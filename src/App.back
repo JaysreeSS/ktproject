@@ -1,0 +1,48 @@
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import Login from "./pages/Login";
+import AdminDashboard from "./pages/admin/Dashboard";
+import UserDashboard from "./pages/user/Dashboard";
+
+function ProtectedRoute({ allowedRoles }: { allowedRoles?: string[] }) {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role) && user.role !== 'admin' && !user.isAdmin) {
+    // Check for 'admin' role explicitly if needed, but MOCK_USERS have 'admin' role or 'isAdmin' flag
+    // Logic: if required role is present in allowedRoles
+    // For Admin route, allowedRoles=['admin']
+
+    const userHasRole = allowedRoles.includes(user.role) || (user.isAdmin && allowedRoles.includes('admin'));
+    if (!userHasRole) {
+      return <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} replace />;
+    }
+  }
+
+  return <Outlet />;
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<UserDashboard />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
+}
+
+export default App;
