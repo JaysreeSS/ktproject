@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# Project KT (Knowledge Transfer) System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive web application designed to streamline the knowledge transfer process between teams and individuals. This system facilitates structured handovers, ensuring that critical project information, documentation, and responsibilities are effectively transferred from an **Initiator** (outgoing member) to a **Receiver** (incoming member).
 
-Currently, two official plugins are available:
+## 🚀 Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The **Project Knowledge Transfer & Handover Management System** solves the problem of unstructured and incomplete handovers. It provides a governed framework where Administrators define mandatory sections, Managers oversee project lifecycles, and team members execute structured handover tasks.
 
-## React Compiler
+### Core Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+*   **Role-Based Access Control**: specialized dashboards for Admins, Managers, Developers, and QA.
+*   **Admin Governance**:
+    *   **User Management**: Create and manage users with specific roles (Admin, Manager, Dev, QA).
+    *   **Template Management**: Define mandatory "Governance Templates" (sections) that every project handover must include. Now supports **File Attachments** for standard templates.
+*   **Structured Handovers**:
+    *   **Initiators**: Fill out sections, upload proofs/documents, and mark items as "Explained".
+    *   **Receivers**: Review content, ask for clarification, and mark items as "Understood".
+*   **Dynamic Workflows**: Real-time status tracking (Clarification Needed, Understood, Pending).
+*   **Supabase Integration**:
+    *   **PostgreSQL**: Persistent storage for Users, Templates, and Project data.
+    *   **Object Storage**: Secure file uploads for documents and assets.
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+*   **Frontend**: React (JavaScript) + Vite
+*   **Styling**: Tailwind CSS + Shadcn UI (for a premium, glassmorphism aesthetic)
+*   **Backend**: Supabase (PostgreSQL Database & Auth)
+*   **Storage**: Supabase Storage
+*   **Icons**: Lucide React
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📦 Installation & Setup
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Clone the Repository
+```bash
+git clone https://github.com/JaysreeSS/ktproject.git
+cd ktproject
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 2. Install Dependencies
+```bash
+npm install
 ```
+
+### 3. Configure Environment Variables
+Create a `.env` file in the root directory and add your Supabase credentials:
+```env
+VITE_SUPABASE_URL=your_project_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+```
+
+### 4. Setup Database
+Run the SQL scripts provided in `SUPABASE_SETUP.md` in your Supabase SQL Editor to create the necessary tables (`users`, `templates`) and storage buckets.
+
+### 5. Run Locally
+```bash
+npm run dev
+```
+
+## 📝 Usage Guide
+
+*   **Admin Portal**: Access via `/admin` (or login as Admin). Manage the "Blueprint" (sections) and Users.
+*   **Manager Dashboard**: Create new projects and assign Initiators/Receivers.
+*   **Handover Flow**:
+    1.  **Initiator** logs in, selects the project, and fills in the "Governance Sections".
+    2.  **Receiver** logs in, reviews the content, and accepts the handover.
+
+## 📄 License
+
+This project is for internal knowledge transfer usage.

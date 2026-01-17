@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 const AuthContext = createContext(undefined);
 
@@ -22,9 +23,22 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (username, type) => {
-        const found = MOCK_USERS.find(u => u.username === username);
+        // Try to find user in Supabase
+        const { data: dbUsers, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('username', username);
+
+        let found = null;
+        if (!error && dbUsers && dbUsers.length > 0) {
+            found = dbUsers[0];
+        } else {
+            // Fallback to Mock Data
+            found = MOCK_USERS.find(u => u.username === username);
+        }
 
         if (found) {
+            // Check if user has permission for the requested view
             if (type === "admin" && !found.isAdmin) return false;
             if (type === "user" && found.isAdmin) return false;
 

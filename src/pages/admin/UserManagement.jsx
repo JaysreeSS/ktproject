@@ -8,7 +8,7 @@ import { UserPlus, UserCog, Trash2, ShieldCheck, ChevronLeft, User, Mail, MoreHo
 import { useNavigate } from 'react-router-dom';
 
 export default function UserManagement() {
-    const { users, addUser, updateUser, deleteUser, resetUsers } = useAdmin();
+    const { users, addUser, updateUser, deleteUser, isMockData, seedDatabase } = useAdmin();
     const navigate = useNavigate();
 
     const [isAdding, setIsAdding] = useState(false);
@@ -65,9 +65,6 @@ export default function UserManagement() {
                     <ChevronLeft className="w-4 h-4 mr-1" /> Back to Portal
                 </Button>
                 <div className="flex gap-4">
-                    <Button variant="outline" onClick={resetUsers} className="rounded-xl border-slate-200 text-slate-500 hover:text-primary hover:border-primary/20 h-11 px-4 font-bold">
-                        <RotateCw className="w-4 h-4 mr-2" /> Restore Defaults
-                    </Button>
                     {!isAdding && (
                         <Button onClick={() => setIsAdding(true)} className="bg-primary shadow-lg shadow-primary/20 rounded-xl px-6 font-bold h-11">
                             <UserPlus className="w-4 h-4 mr-2" /> New User
@@ -80,6 +77,33 @@ export default function UserManagement() {
                 <h1 className="text-4xl font-black text-slate-900 tracking-tight">Identity & Access</h1>
                 <p className="text-slate-500 mt-2 font-medium">Manage corporate identities, functional roles, and system permissions.</p>
             </header>
+
+            {isMockData && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 animate-pulse">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                            <ShieldCheck className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="text-amber-900 font-black">Running on Mock Data</h3>
+                            <p className="text-amber-700 text-sm font-medium">Your Supabase connection is active but the database appears to be empty.</p>
+                        </div>
+                    </div>
+                    <Button
+                        onClick={async () => {
+                            const res = await seedDatabase();
+                            if (res.success) {
+                                alert("Database seeded successfully!");
+                            } else {
+                                alert("Seeding failed. Please check the console and your Supabase setup.");
+                            }
+                        }}
+                        className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 rounded-xl"
+                    >
+                        Sync Mock Data to Supabase
+                    </Button>
+                </div>
+            )}
 
             {isAdding && (
                 <Card className="shadow-2xl border-none ring-1 ring-slate-200 rounded-[2rem] overflow-hidden">

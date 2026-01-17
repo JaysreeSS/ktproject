@@ -1,85 +1,130 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, User, Sparkles, ArrowRight } from "lucide-react";
+import { ShieldCheck, User, ArrowRight, Sparkles } from "lucide-react";
 
 export default function Landing() {
     const navigate = useNavigate();
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            setMousePos({ x: e.clientX, y: e.clientY });
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
 
     return (
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center relative overflow-hidden p-6">
-            {/* Background Decorations */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="h-screen w-full bg-[#fcfaff] flex flex-col items-center justify-center relative overflow-hidden font-sans">
+            {/* Dynamic Background Elements */}
+            <div
+                className="absolute w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none transition-transform duration-1000 ease-out"
+                style={{
+                    transform: `translate(${mousePos.x / 15}px, ${mousePos.y / 15}px)`,
+                    top: '10%',
+                    left: '10%'
+                }}
+            />
+            <div
+                className="absolute w-[500px] h-[500px] bg-purple-400/5 rounded-full blur-[100px] pointer-events-none transition-transform duration-700 ease-out"
+                style={{
+                    transform: `translate(${-(mousePos.x / 20)}px, ${-(mousePos.y / 20)}px)`,
+                    bottom: '5%',
+                    right: '10%'
+                }}
+            />
 
-            <div className="z-10 w-full max-w-4xl space-y-12">
-                <div className="text-center space-y-6">
-                    <img src="/src/assets/logo.png" alt="Company Logo" className="h-20 mx-auto mb-8 animate-in fade-in zoom-in-50 duration-700" />
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
-                        Knowledge Transfer Portal
-                    </h1>
-                    <p className="text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
-                        Select your operational role to access the secure workspace.
-                    </p>
+            {/* Mouse Sparkle Effect Container */}
+            <div
+                className="absolute pointer-events-none z-50 transition-opacity duration-300"
+                style={{
+                    left: mousePos.x,
+                    top: mousePos.y,
+                    transform: 'translate(-50%, -50%)'
+                }}
+            >
+                <div className="relative">
+                    <Sparkles className="w-6 h-6 text-primary/30 animate-pulse absolute -top-4 -left-4" />
+                    <Sparkles className="w-4 h-4 text-primary/20 animate-bounce absolute -bottom-2 -right-6" style={{ animationDelay: '0.5s' }} />
                 </div>
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
-                    {/* Admin Card */}
+            <div className="z-10 w-full max-w-5xl px-6 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                <header className="text-center mb-16 space-y-2">
+                    <div className="relative inline-block mb-8">
+                        <img
+                            src="/src/assets/logo.png"
+                            alt="Company Logo"
+                            className="h-20 w-auto relative z-10 drop-shadow-sm"
+                        />
+                        <div className="absolute -inset-4 bg-primary/5 rounded-full blur-xl -z-0 animate-pulse" />
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900">
+                        Knowledge Transfer <span className="text-primary">Portal</span>
+                    </h1>
+                    <p className="text-slate-500 font-medium max-w-lg mx-auto leading-relaxed">
+                        A centralized gateway for corporate knowledge governance,
+                        project handovers, and identity-based access.
+                    </p>
+                </header>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+                    {/* Admin Access Card */}
                     <Card
-                        className="group relative overflow-hidden border-2 border-border hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-xl hover:shadow-2xl hover:shadow-primary/10 bg-card"
+                        className="group relative h-64 overflow-hidden border-none bg-white/40 backdrop-blur-md ring-1 ring-slate-200 hover:ring-primary/30 transition-all duration-500 cursor-pointer shadow-sm hover:shadow-2xl hover:shadow-primary/5 rounded-[2.5rem]"
                         onClick={() => navigate('/admin-login')}
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                        <CardContent className="p-10 flex flex-col items-center text-center space-y-6 relative z-10">
-                            <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <ShieldCheck className="w-10 h-10 text-primary" />
+                        <CardContent className="h-full p-10 flex flex-col items-center justify-center text-center space-y-6 relative z-10">
+                            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 transform group-hover:-translate-y-2">
+                                <ShieldCheck className="w-8 h-8 text-primary group-hover:text-white" />
                             </div>
-                            <div className="space-y-2">
-                                <h2 className="text-2xl font-bold text-foreground">Administrator</h2>
-                                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                                    System configuration, user management, and global oversight.
+                            <div className="space-y-1">
+                                <h2 className="text-xl font-black text-slate-800 tracking-tight transition-colors group-hover:text-primary">Administrator</h2>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                                    Governance & Operations
                                 </p>
                             </div>
-                            <div className="pt-4 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                                <span className="inline-flex items-center text-primary font-bold text-sm uppercase tracking-wider">
-                                    Access Portal <ArrowRight className="ml-2 w-4 h-4" />
-                                </span>
+
+                            <div className="absolute bottom-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-75">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Enter Dashboard</span>
+                                <ArrowRight className="w-3 h-3 text-primary animate-in slide-in-from-left-2" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* User Card */}
+                    {/* User Access Card */}
                     <Card
-                        className="group relative overflow-hidden border-2 border-border hover:border-blue-400/50 transition-all duration-300 cursor-pointer shadow-xl hover:shadow-2xl hover:shadow-blue-400/10 bg-card"
+                        className="group relative h-64 overflow-hidden border-none bg-white/40 backdrop-blur-md ring-1 ring-slate-200 hover:ring-primary/30 transition-all duration-500 cursor-pointer shadow-sm hover:shadow-2xl hover:shadow-primary/5 rounded-[2.5rem]"
                         onClick={() => navigate('/user-login')}
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                        <CardContent className="p-10 flex flex-col items-center text-center space-y-6 relative z-10">
-                            <div className="w-20 h-20 rounded-2xl bg-blue-400/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <User className="w-10 h-10 text-blue-500" />
+                        <CardContent className="h-full p-10 flex flex-col items-center justify-center text-center space-y-6 relative z-10">
+                            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 transform group-hover:-translate-y-2">
+                                <User className="w-8 h-8 text-primary group-hover:text-white" />
                             </div>
-                            <div className="space-y-2">
-                                <h2 className="text-2xl font-bold text-foreground">Associate</h2>
-                                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                                    Project initiation, contribution, and knowledge reception.
+                            <div className="space-y-1">
+                                <h2 className="text-xl font-black text-slate-800 tracking-tight transition-colors group-hover:text-primary">Associate</h2>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                                    Project & Collaboration
                                 </p>
                             </div>
-                            <div className="pt-4 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                                <span className="inline-flex items-center text-blue-500 font-bold text-sm uppercase tracking-wider">
-                                    Access Portal <ArrowRight className="ml-2 w-4 h-4" />
-                                </span>
+
+                            <div className="absolute bottom-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-75">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Access Gateway</span>
+                                <ArrowRight className="w-3 h-3 text-primary animate-in slide-in-from-left-2" />
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                <div className="text-center pt-8">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Secure Corporate Gateway
-                    </p>
-                </div>
+                <footer className="mt-16 text-center">
+                    <div className="px-6 py-2 rounded-full bg-white/50 backdrop-blur-sm border border-slate-100 shadow-sm flex items-center gap-3 animate-pulse">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            Secure Enterprise Connection Established
+                        </span>
+                    </div>
+                </footer>
             </div>
         </div>
     );
