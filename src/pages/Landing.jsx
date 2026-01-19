@@ -16,7 +16,7 @@ export default function Landing() {
     }, []);
 
     return (
-        <div className="h-screen w-full bg-[#fcfaff] flex flex-col items-center justify-center relative overflow-hidden font-sans">
+        <div className="min-h-screen w-full bg-[#fcfaff] flex flex-col items-center justify-center relative overflow-hidden font-sans py-20">
             {/* Dynamic Background Elements */}
             <div
                 className="absolute w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none transition-transform duration-1000 ease-out"
@@ -116,15 +116,6 @@ export default function Landing() {
                         </CardContent>
                     </Card>
                 </div>
-
-                <footer className="mt-16 text-center">
-                    <div className="px-6 py-2 rounded-full bg-white/50 backdrop-blur-sm border border-slate-100 shadow-sm flex items-center gap-3 animate-pulse">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                            Secure Enterprise Connection Established
-                        </span>
-                    </div>
-                </footer>
             </div>
         </div>
     );

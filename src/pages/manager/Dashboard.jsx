@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useProjects } from '../../contexts/ProjectContext.jsx';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Folder, Clock, CheckCircle2, ChevronRight, LogOut } from 'lucide-react';
+import { Plus, Folder, Clock, CheckCircle2, ChevronRight, LogOut, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 
@@ -26,9 +26,8 @@ export default function ManagerDashboard() {
 
                     {/* Main Navigation */}
                     <nav className="hidden md:flex items-center gap-1">
-                        <TopNavItem icon={<Activity className="w-4 h-4" />} label="Dashboard" active />
-                        <TopNavItem icon={<Folder className="w-4 h-4" />} label="All Projects" />
-                        <TopNavItem icon={<Plus className="w-4 h-4" />} label="Create Project" onClick={() => navigate('/manager/create-project')} />
+                        <TopNavItem icon={<Activity className="w-4 h-4" />} label="Dashboard" active onClick={() => navigate('/dashboard')} />
+                        <TopNavItem icon={<Folder className="w-4 h-4" />} label="All Projects" onClick={() => navigate('/manager/projects')} />
                     </nav>
                 </div>
 
@@ -50,9 +49,6 @@ export default function ManagerDashboard() {
                 {/* Hero Section */}
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-10">
                     <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-primary bg-secondary w-fit px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                            <CheckCircle2 className="w-3 h-3" /> System Online
-                        </div>
                         <h1 className="text-4xl font-bold tracking-tight text-foreground leading-tight">
                             Manager Dashboard
                         </h1>
@@ -83,7 +79,7 @@ export default function ManagerDashboard() {
                                 <Clock className="w-4 h-4 mr-2" /> ACTIVE HANDOVERS
                             </CardDescription>
                             <CardTitle className="text-4xl font-bold text-foreground">
-                                {managerProjects.filter(p => p.status === 'In Progress').length}
+                                {managerProjects.filter(p => p.status !== 'Completed').length}
                             </CardTitle>
                         </CardHeader>
                     </Card>
@@ -124,8 +120,8 @@ export default function ManagerDashboard() {
                                 </CardContent>
                             </Card>
                         ) : (
-                            managerProjects.map(project => (
-                                <ProjectCard key={project.id} project={project} onOpen={() => navigate(`/project/${project.id}`)} />
+                            managerProjects.slice(0, 4).map(project => (
+                                <ProjectCard key={project.id} project={project} onOpen={() => navigate(`/manager/manage-project/${project.id}`)} />
                             ))
                         )}
                     </div>
@@ -208,8 +204,4 @@ function ProjectCard({ project, onOpen }) {
     );
 }
 
-function Activity({ className }) {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-    )
-}
+

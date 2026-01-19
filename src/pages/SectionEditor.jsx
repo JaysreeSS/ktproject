@@ -66,7 +66,7 @@ export default function SectionEditor() {
         <div className="p-10 max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Context Navigation */}
             <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={() => navigate(`/project/${projectId}`)} className="rounded-xl hover:bg-card text-muted-foreground font-bold uppercase tracking-widest text-[10px]">
+                <Button variant="ghost" onClick={() => navigate(`/manager/manage-project/${projectId}`)} className="rounded-xl hover:bg-card text-muted-foreground font-bold uppercase tracking-widest text-[10px]">
                     <ChevronLeft className="w-4 h-4 mr-2" /> Back to Project
                 </Button>
                 <div className="flex gap-4 items-center">

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { UserPlus, UserCog, Trash2, ShieldCheck, ChevronLeft, User, Mail, MoreHorizontal, Eye, EyeOff, RotateCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function UserManagement() {
+export default function UserManagement({ isEmbedded = false }) {
     const { users, addUser, updateUser, deleteUser, isMockData, seedDatabase } = useAdmin();
     const navigate = useNavigate();
 
@@ -59,24 +59,36 @@ export default function UserManagement() {
     };
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={() => navigate('/admin')} className="rounded-full">
-                    <ChevronLeft className="w-4 h-4 mr-1" /> Back to Portal
-                </Button>
-                <div className="flex gap-4">
-                    {!isAdding && (
-                        <Button onClick={() => setIsAdding(true)} className="bg-primary shadow-lg shadow-primary/20 rounded-xl px-6 font-bold h-11">
-                            <UserPlus className="w-4 h-4 mr-2" /> New User
-                        </Button>
-                    )}
+        <div className={`p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 ${isEmbedded ? 'p-10' : ''}`}>
+            {!isEmbedded && (
+                <div className="flex items-center justify-between">
+                    <Button variant="ghost" onClick={() => navigate('/admin')} className="rounded-full">
+                        <ChevronLeft className="w-4 h-4 mr-1" /> Back to Portal
+                    </Button>
+                    <div className="flex gap-4">
+                        {!isAdding && (
+                            <Button onClick={() => setIsAdding(true)} className="bg-primary shadow-lg shadow-primary/20 rounded-xl px-6 font-bold h-11">
+                                <UserPlus className="w-4 h-4 mr-2" /> New User
+                            </Button>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            <header>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tight">Identity & Access</h1>
-                <p className="text-slate-500 mt-2 font-medium">Manage corporate identities, functional roles, and system permissions.</p>
-            </header>
+            {isEmbedded && !isAdding && (
+                <div className="flex justify-end">
+                    <Button onClick={() => setIsAdding(true)} className="bg-primary shadow-lg shadow-primary/20 rounded-xl px-6 font-bold h-11">
+                        <UserPlus className="w-4 h-4 mr-2" /> New User
+                    </Button>
+                </div>
+            )}
+
+            {!isEmbedded && (
+                <header>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Identity & Access</h1>
+                    <p className="text-slate-500 mt-2 font-medium">Manage corporate identities, functional roles, and system permissions.</p>
+                </header>
+            )}
 
             {isMockData && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 animate-pulse">
@@ -158,10 +170,10 @@ export default function UserManagement() {
                                 >
                                     <option value="" disabled>Select Role</option>
                                     <option value="developer">Developer</option>
-                                    <option value="manager">Manager</option>
                                     <option value="qa">QA Engineer</option>
                                     <option value="ba">Business Analyst</option>
                                     <option value="support">Support</option>
+                                    <option value="manager">Manager</option>
                                     <option value="admin">System Admin</option>
                                 </select>
                             </div>

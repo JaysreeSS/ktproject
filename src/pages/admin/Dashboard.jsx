@@ -2,114 +2,105 @@ import React from "react";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Users, FileText, Activity, LogOut, ShieldCheck, Zap, Globe, Command } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Users, LogOut, LayoutDashboard, Database, ArrowRight } from "lucide-react";
 
 export default function AdminDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
-    const adminActions = [
-        {
-            title: "Identity Management",
-            description: "Control access levels and manage corporate personas.",
-            icon: <Users className="w-8 h-8 text-primary" />,
-            path: "/admin/users",
-            color: "primary",
-            tag: "Access Control"
-        },
-        {
-            title: "Blueprint Governance",
-            description: "Design the mandatory structure for project handovers.",
-            icon: <FileText className="w-8 h-8 text-primary" />,
-            path: "/admin/templates",
-            color: "primary",
-            tag: "Standards"
-        },
-        {
-            title: "Global Overview",
-            description: "Institutional audit trail of all knowledge transfer events.",
-            icon: <Activity className="w-8 h-8 text-primary" />,
-            path: "/admin/projects",
-            color: "primary",
-            tag: "Governance"
-        },
-    ];
-
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-slate-50/50 flex flex-col">
             {/* Top Navigation Bar */}
-            <div className="bg-background/80 backdrop-blur-md sticky top-0 z-50 border-b border-border px-8 py-4 flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-3">
-                    <img src="/src/assets/logo.png" alt="Logo" className="h-8" />
-                    <span className="font-bold text-foreground tracking-tight uppercase text-lg hidden sm:block">Admin Console</span>
+            <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-6">
+                    <img src="/src/assets/logo.png" alt="Logo" className="h-10 w-auto" />
+                    <div className="h-8 w-[1px] bg-slate-200 hidden sm:block" />
+                    <div>
+                        <span className="font-black text-slate-900 tracking-tight uppercase text-lg hidden sm:block">Admin Console</span>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">System Oversight</p>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 pr-6 border-r border-slate-200">
                         <div className="text-right hidden sm:block">
-                            <p className="text-sm font-bold text-foreground">{user?.name}</p>
-                            <p className="text-xs text-muted-foreground">Administrator</p>
+                            <p className="text-sm font-black text-slate-900">{user?.name}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Global Admin</p>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={logout} className="rounded-xl hover:bg-destructive/10 hover:text-destructive">
-                            <LogOut className="w-5 h-5" />
-                        </Button>
+                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-900 font-bold border-2 border-white shadow-sm ring-1 ring-slate-100">
+                            {user?.name?.charAt(0) || 'A'}
+                        </div>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={logout} className="rounded-xl hover:bg-red-50 hover:text-red-500 transition-colors">
+                        <LogOut className="w-5 h-5" />
+                    </Button>
+                </div>
+            </header>
+
+            <main className="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full flex flex-col items-center justify-center space-y-12">
+                <div className="text-center space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <h1 className="text-5xl font-black text-slate-900 tracking-tight">System Control Center</h1>
+                    <p className="text-slate-500 font-medium text-lg max-w-2xl mx-auto">
+                        Select a governance module to manage corporate identities, protocol blueprints, or monitor real-time knowledge transfer progress.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl animate-in fade-in zoom-in-95 duration-1000 delay-150">
+                    <div
+                        onClick={() => navigate('/admin/users')}
+                        className="group bg-white border border-slate-200 p-10 rounded-[2.5rem] flex flex-col items-center gap-6 shadow-sm hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 cursor-pointer border-b-4 border-b-transparent hover:border-b-primary"
+                    >
+                        <div className="w-20 h-20 rounded-[2rem] bg-slate-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
+                            <Users className="w-10 h-10" />
+                        </div>
+                        <div className="text-center space-y-2">
+                            <h3 className="text-2xl font-black text-slate-900">Users Identity</h3>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                                Manage corporate personas, access levels, and system permissions for all associates.
+                            </p>
+                        </div>
+                        <div className="mt-4 flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                            Open Module <ArrowRight className="w-4 h-4" />
+                        </div>
+                    </div>
+
+                    <div
+                        onClick={() => navigate('/admin/templates')}
+                        className="group bg-white border border-slate-200 p-10 rounded-[2.5rem] flex flex-col items-center gap-6 shadow-sm hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 cursor-pointer border-b-4 border-b-transparent hover:border-b-primary"
+                    >
+                        <div className="w-20 h-20 rounded-[2rem] bg-slate-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
+                            <LayoutDashboard className="w-10 h-10" />
+                        </div>
+                        <div className="text-center space-y-2">
+                            <h3 className="text-2xl font-black text-slate-900">Sections Creation</h3>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                                Design and govern mandatory document structures for all knowledge transfer sessions.
+                            </p>
+                        </div>
+                        <div className="mt-4 flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                            Open Module <ArrowRight className="w-4 h-4" />
+                        </div>
+                    </div>
+
+                    <div
+                        onClick={() => navigate('/admin/projects')}
+                        className="group bg-white border border-slate-200 p-10 rounded-[2.5rem] flex flex-col items-center gap-6 shadow-sm hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 cursor-pointer border-b-4 border-b-transparent hover:border-b-primary"
+                    >
+                        <div className="w-20 h-20 rounded-[2rem] bg-slate-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
+                            <Database className="w-10 h-10" />
+                        </div>
+                        <div className="text-center space-y-2">
+                            <h3 className="text-2xl font-black text-slate-900">Project Monitoring</h3>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                                Monitor progress and access audit trails for all active and completed projects.
+                            </p>
+                        </div>
+                        <div className="mt-4 flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                            Open Module <ArrowRight className="w-4 h-4" />
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div className="p-10 max-w-7xl mx-auto space-y-12">
-                {/* Hero Layout */}
-                <header className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                    <div className="space-y-6">
-
-                        <h1 className="text-5xl font-bold tracking-tight text-foreground">
-                            Overview
-                        </h1>
-                        <p className="text-lg text-muted-foreground font-medium max-w-lg leading-relaxed">
-                            Manage users, project templates, and view system-wide audits.
-                        </p>
-                    </div>
-                </header>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8">
-                    {adminActions.map((action) => (
-                        <Card
-                            key={action.path}
-                            className="group hover:-translate-y-1 hover:border-primary/50 transition-all duration-300 cursor-pointer border border-border rounded-xl bg-card"
-                            onClick={() => navigate(action.path)}
-                        >
-                            <CardHeader className="p-8 pb-4">
-                                <div className={`mb-6 p-4 bg-secondary rounded-xl w-fit group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300`}>
-                                    {React.cloneElement(action.icon, { className: "w-8 h-8 group-hover:text-primary-foreground transition-colors" })}
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold uppercase tracking-wider text-primary">{action.tag}</p>
-                                    <CardTitle className="text-2xl font-bold text-foreground leading-tight">
-                                        {action.title}
-                                    </CardTitle>
-                                </div>
-                                <CardDescription className="text-muted-foreground font-medium pt-2 text-sm leading-relaxed">
-                                    {action.description}
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-8 pt-0 flex justify-end">
-                                <div className="p-2 rounded-full opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 text-primary">
-                                    <ArrowRight className="w-5 h-5" />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </div>
+            </main>
         </div>
     );
-}
-
-function ArrowRight({ className }) {
-    return (
-        <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-        </svg>
-    )
 }

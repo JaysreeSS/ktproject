@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Eye, ShieldAlert, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function AdminProjects() {
+export default function AdminProjects({ isEmbedded = false }) {
     const { projects, deleteProject } = useProjects();
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -23,17 +23,21 @@ export default function AdminProjects() {
     };
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={() => navigate('/admin')} className="rounded-full">
-                    <ChevronLeft className="w-4 h-4 mr-1" /> Back to Portal
-                </Button>
-            </div>
+        <div className={`p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 ${isEmbedded ? 'p-10' : ''}`}>
+            {!isEmbedded && (
+                <div className="flex items-center justify-between">
+                    <Button variant="ghost" onClick={() => navigate('/admin')} className="rounded-full">
+                        <ChevronLeft className="w-4 h-4 mr-1" /> Back to Portal
+                    </Button>
+                </div>
+            )}
 
-            <header>
-                <h1 className="text-4xl font-black tracking-tight text-slate-900">Project Governance</h1>
-                <p className="text-slate-500 mt-2 font-medium">Global oversight of all knowledge transfer sessions and system records.</p>
-            </header>
+            {!isEmbedded && (
+                <header>
+                    <h1 className="text-4xl font-black tracking-tight text-slate-900">Project Governance</h1>
+                    <p className="text-slate-500 mt-2 font-medium">Global oversight of all knowledge transfer sessions and system records.</p>
+                </header>
+            )}
 
             <div className="grid grid-cols-1 gap-6">
                 {projects.length === 0 ? (

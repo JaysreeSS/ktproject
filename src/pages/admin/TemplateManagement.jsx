@@ -9,7 +9,7 @@ import { FileText, Plus, Trash2, ChevronLeft, Layout, Lock, Info, ExternalLink, 
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
-export default function TemplateManagement() {
+export default function TemplateManagement({ isEmbedded = false }) {
     const { templates, addTemplate, deleteTemplate } = useAdmin();
     const navigate = useNavigate();
     const [newTitle, setNewTitle] = useState('');
@@ -32,17 +32,21 @@ export default function TemplateManagement() {
     };
 
     return (
-        <div className="p-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={() => navigate('/admin')} className="rounded-full">
-                    <ChevronLeft className="w-4 h-4 mr-1" /> Back to Portal
-                </Button>
-            </div>
+        <div className={`p-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 ${isEmbedded ? 'p-10' : ''}`}>
+            {!isEmbedded && (
+                <div className="flex items-center justify-between">
+                    <Button variant="ghost" onClick={() => navigate('/admin')} className="rounded-full">
+                        <ChevronLeft className="w-4 h-4 mr-1" /> Back to Portal
+                    </Button>
+                </div>
+            )}
 
-            <header>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tight">Governance Templates</h1>
-                <p className="text-slate-500 mt-2 font-medium">Define the mandatory sections for all corporate knowledge transfer sessions.</p>
-            </header>
+            {!isEmbedded && (
+                <header>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Governance Templates</h1>
+                    <p className="text-slate-500 mt-2 font-medium">Define the mandatory sections for all corporate knowledge transfer sessions.</p>
+                </header>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Creation panel */}
