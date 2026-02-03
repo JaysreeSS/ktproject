@@ -16,6 +16,7 @@ import AllProjects from "./pages/manager/AllProjects.jsx";
 import ManageProject from "./pages/manager/ManageProject.jsx";
 import ProjectDetails from "./pages/ProjectDetails.jsx";
 import SectionEditor from "./pages/SectionEditor.jsx";
+import AdminLayout from "./components/AdminLayout.jsx";
 
 function ProtectedRoute({ allowedRoles }) {
     const { isAuthenticated, user } = useAuth();
@@ -39,20 +40,21 @@ export default function App() {
                 <ProjectProvider>
                     <Router>
                         <Routes>
-                            {/* Routes with Footer */}
-                            <Route element={<LayoutWithFooter />}>
-                                {/* Public Routes */}
-                                <Route path="/" element={<Landing />} />
+                            {/* Unified Landing / Login Page */}
+                            <Route path="/" element={<Landing />} />
 
-                                {/* Admin Routes */}
+                            {/* Admin Layout & Routes */}
+                            <Route element={<AdminLayout />}>
                                 <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
                                     <Route path="/admin" element={<AdminDashboard />} />
                                     <Route path="/admin/users" element={<UserManagement />} />
                                     <Route path="/admin/templates" element={<TemplateManagement />} />
                                     <Route path="/admin/projects" element={<AdminProjects />} />
                                 </Route>
+                            </Route>
 
-                                {/* General User Routes */}
+                            {/* General User Layout (Footer enabled) */}
+                            <Route element={<LayoutWithFooter />}>
                                 <Route element={<ProtectedRoute />}>
                                     <Route path="/dashboard" element={<DashboardRedirect />} />
 
@@ -69,16 +71,16 @@ export default function App() {
                                 </Route>
                             </Route>
 
-                            {/* Routes WITHOUT Footer (Login Pages) */}
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/admin-login" element={<Login />} />
-                            <Route path="/user-login" element={<Login />} />
+                            {/* Legacy Redirects */}
+                            <Route path="/login" element={<Navigate to="/" replace />} />
+                            <Route path="/admin-login" element={<Navigate to="/" replace />} />
+                            <Route path="/user-login" element={<Navigate to="/" replace />} />
 
                             <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
                     </Router>
                 </ProjectProvider>
             </AdminProvider>
-        </AuthProvider>
+        </AuthProvider >
     );
 }
