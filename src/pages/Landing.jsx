@@ -1,121 +1,147 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../contexts/AuthContext.jsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, User, ArrowRight, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 
 export default function Landing() {
+    const { login } = useAuth();
     const navigate = useNavigate();
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-    useEffect(() => {
-        const handleMouseMove = (e) => {
-            setMousePos({ x: e.clientX, y: e.clientY });
-        };
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setError("");
+        setIsLoading(true);
+
+        // Aesthetic delay
+        await new Promise(r => setTimeout(r, 600));
+
+        try {
+            const user = await login(username); // No role type needed
+            setIsLoading(false);
+
+            if (user) {
+                if (user.role === 'admin' || user.isAdmin) {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
+            } else {
+                setError("Invalid credentials. Try 'admin' or 'dev'.");
+            }
+        } catch (err) {
+            setIsLoading(false);
+            setError("An error occurred during login.");
+        }
+    };
 
     return (
-        <div className="min-h-screen w-full bg-[#fcfaff] flex flex-col items-center justify-center relative overflow-hidden font-sans py-20">
-            {/* Dynamic Background Elements */}
-            <div
-                className="absolute w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none transition-transform duration-1000 ease-out"
-                style={{
-                    transform: `translate(${mousePos.x / 15}px, ${mousePos.y / 15}px)`,
-                    top: '10%',
-                    left: '10%'
-                }}
-            />
-            <div
-                className="absolute w-[500px] h-[500px] bg-purple-400/5 rounded-full blur-[100px] pointer-events-none transition-transform duration-700 ease-out"
-                style={{
-                    transform: `translate(${-(mousePos.x / 20)}px, ${-(mousePos.y / 20)}px)`,
-                    bottom: '5%',
-                    right: '10%'
-                }}
-            />
+        <div className="min-h-screen w-full bg-[#f8f9fc] flex flex-col items-center justify-center relative overflow-hidden font-sans">
 
-            {/* Mouse Sparkle Effect Container */}
-            <div
-                className="absolute pointer-events-none z-50 transition-opacity duration-300"
-                style={{
-                    left: mousePos.x,
-                    top: mousePos.y,
-                    transform: 'translate(-50%, -50%)'
-                }}
-            >
-                <div className="relative">
-                    <Sparkles className="w-6 h-6 text-primary/30 animate-pulse absolute -top-4 -left-4" />
-                    <Sparkles className="w-4 h-4 text-primary/20 animate-bounce absolute -bottom-2 -right-6" style={{ animationDelay: '0.5s' }} />
-                </div>
-            </div>
+            {/* Subtle Background Blobs */}
+            <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-50/50 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-blue-50/50 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="z-10 w-full max-w-5xl px-6 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                <header className="text-center mb-16 space-y-2">
-                    <div className="relative inline-block mb-8">
+            <div className="z-10 w-full max-w-sm px-4 flex flex-col items-center animate-in fade-in zoom-in-95 duration-700">
+
+                {/* Minimal Header */}
+                <header className="text-center mb-8 space-y-3">
+                    <div className="flex justify-center mb-4">
                         <img
                             src="/src/assets/logo.png"
-                            alt="Company Logo"
-                            className="h-20 w-auto relative z-10 drop-shadow-sm"
+                            alt="Logo"
+                            className="h-10 w-auto opacity-90 grayscale-[0.2]"
                         />
-                        <div className="absolute -inset-4 bg-primary/5 rounded-full blur-xl -z-0 animate-pulse" />
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900">
-                        Knowledge Transfer <span className="text-primary">Portal</span>
+                    <h1 className="text-xl font-bold tracking-tight text-slate-800">
+                        Knowledge Transfer Portal
                     </h1>
-                    <p className="text-slate-500 font-medium max-w-lg mx-auto leading-relaxed">
-                        A centralized gateway for corporate knowledge governance,
-                        project handovers, and identity-based access.
-                    </p>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-                    {/* Admin Access Card */}
-                    <Card
-                        className="group relative h-64 overflow-hidden border-none bg-white/40 backdrop-blur-md ring-1 ring-slate-200 hover:ring-primary/30 transition-all duration-500 cursor-pointer shadow-sm hover:shadow-2xl hover:shadow-primary/5 rounded-[2.5rem]"
-                        onClick={() => navigate('/admin-login')}
-                    >
-                        <CardContent className="h-full p-10 flex flex-col items-center justify-center text-center space-y-6 relative z-10">
-                            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 transform group-hover:-translate-y-2">
-                                <ShieldCheck className="w-8 h-8 text-primary group-hover:text-white" />
-                            </div>
-                            <div className="space-y-1">
-                                <h2 className="text-xl font-black text-slate-800 tracking-tight transition-colors group-hover:text-primary">Administrator</h2>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
-                                    Governance & Operations
-                                </p>
-                            </div>
-
-                            <div className="absolute bottom-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-75">
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Enter Dashboard</span>
-                                <ArrowRight className="w-3 h-3 text-primary animate-in slide-in-from-left-2" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* User Access Card */}
-                    <Card
-                        className="group relative h-64 overflow-hidden border-none bg-white/40 backdrop-blur-md ring-1 ring-slate-200 hover:ring-primary/30 transition-all duration-500 cursor-pointer shadow-sm hover:shadow-2xl hover:shadow-primary/5 rounded-[2.5rem]"
-                        onClick={() => navigate('/user-login')}
-                    >
-                        <CardContent className="h-full p-10 flex flex-col items-center justify-center text-center space-y-6 relative z-10">
-                            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 transform group-hover:-translate-y-2">
-                                <User className="w-8 h-8 text-primary group-hover:text-white" />
-                            </div>
-                            <div className="space-y-1">
-                                <h2 className="text-xl font-black text-slate-800 tracking-tight transition-colors group-hover:text-primary">Associate</h2>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
-                                    Project & Collaboration
-                                </p>
+                {/* Login Card */}
+                <Card className="w-full border-none shadow-xl shadow-slate-200/50 bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden ring-1 ring-slate-100">
+                    <CardContent className="p-8 pt-8">
+                        <form onSubmit={handleLogin} className="space-y-5">
+                            <div className="space-y-2">
+                                <Label htmlFor="username" className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
+                                    System ID
+                                </Label>
+                                <Input
+                                    id="username"
+                                    placeholder="Enter your username"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="h-10 rounded-lg bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all font-medium text-slate-900"
+                                    required
+                                />
                             </div>
 
-                            <div className="absolute bottom-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-75">
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Access Gateway</span>
-                                <ArrowRight className="w-3 h-3 text-primary animate-in slide-in-from-left-2" />
+                            <div className="space-y-2">
+                                <Label htmlFor="password" className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
+                                    Password
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="h-10 rounded-lg bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all pr-10 text-slate-900"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
                             </div>
-                        </CardContent>
-                    </Card>
-                </div>
+
+                            {error && (
+                                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-xs font-medium text-center animate-in fade-in">
+                                    {error}
+                                </div>
+                            )}
+
+                            <Button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full h-11 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold shadow-md hover:shadow-lg transition-all"
+                            >
+                                {isLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <span className="flex items-center gap-2">
+                                        Sign In <ArrowRight className="w-4 h-4" />
+                                    </span>
+                                )}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+
+                {/* Footer - Contained within layout */}
+                <footer className="mt-8 text-center space-y-2">
+                    <p className="text-[10px] text-slate-400 font-medium">
+                        © {new Date().getFullYear()} Ideassion KT Portal
+                    </p>
+                    <div className="flex justify-center gap-4 text-[10px] text-slate-300 font-bold uppercase tracking-widest">
+                        <span className="hover:text-primary transition-colors cursor-pointer">Privacy</span>
+                        <span className="hover:text-primary transition-colors cursor-pointer">Help</span>
+                    </div>
+                </footer>
+
             </div>
         </div>
     );

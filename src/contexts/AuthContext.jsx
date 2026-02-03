@@ -12,15 +12,12 @@ const MOCK_USERS = [
 ];
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-
-    useEffect(() => {
-        // Restore session
+    const [user, setUser] = useState(() => {
         const storedUser = localStorage.getItem("kt_user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, []);
+        return storedUser ? JSON.parse(storedUser) : null;
+    });
+
+    // useEffect(() => { ... }) removed as it is now redundant
 
     const login = async (username, type) => {
         // Try to find user in Supabase
@@ -38,13 +35,13 @@ export const AuthProvider = ({ children }) => {
         }
 
         if (found) {
-            // Check if user has permission for the requested view
-            if (type === "admin" && !found.isAdmin) return false;
-            if (type === "user" && found.isAdmin) return false;
+            // Unified login: no role check against 'type' required since we are removing role selection
+            // if (type === "admin" && !found.isAdmin) return false;
+            // if (type === "user" && found.isAdmin) return false;
 
             setUser(found);
             localStorage.setItem("kt_user", JSON.stringify(found));
-            return true;
+            return found;
         }
         return false;
     };
