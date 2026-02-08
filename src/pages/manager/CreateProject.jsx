@@ -41,6 +41,15 @@ export default function CreateProject() {
     };
 
     const updateMemberRole = (userId, ktRole) => {
+        // Enforce max 2 initiators
+        if (ktRole === 'Initiator') {
+            const currentInitiators = formData.members.filter(m => m.ktRole === 'Initiator').length;
+            const isAlreadyInitiator = formData.members.find(m => m.userId === userId)?.ktRole === 'Initiator';
+            if (currentInitiators >= 2 && !isAlreadyInitiator) {
+                alert("You can select only up to 2 Initiators.");
+                return;
+            }
+        }
         setFormData({
             ...formData,
             members: formData.members.map(m => m.userId === userId ? { ...m, ktRole } : m)
@@ -76,9 +85,13 @@ export default function CreateProject() {
     };
 
     return (
-        <div className="p-8 max-w-4xl mx-auto space-y-8">
+        <div className="p-5 max-w-4xl mx-auto space-y-5">
             <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={() => navigate('/dashboard')} className="rounded-full">
+                <Button
+                    variant="ghost"
+                    onClick={() => navigate('/dashboard')}
+                    className="w-fit rounded-xl text-primary hover:text-primary hover:bg-primary/10 font-bold uppercase tracking-widest text-[10px] pl-0 hover:pl-2 transition-all"
+                >
                     <ChevronLeft className="w-4 h-4 mr-1" /> Back to Dashboard
                 </Button>
                 <div className="flex gap-2">
@@ -90,38 +103,38 @@ export default function CreateProject() {
 
             {step === 1 && (
                 <Card className="shadow-xl border-none ring-1 ring-slate-200">
-                    <CardHeader className="space-y-1 pb-8">
-                        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
-                            <FileText className="w-6 h-6" />
+                    <CardHeader className="p-5 pb-5 border-b border-slate-50">
+                        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-3">
+                            <FileText className="w-5 h-5" />
                         </div>
-                        <CardTitle className="text-2xl font-bold">Project Details</CardTitle>
-                        <CardDescription>Tell us about the project and why knowledge transfer is needed.</CardDescription>
+                        <CardTitle className="text-base font-black text-slate-800 uppercase tracking-tight">Project Details</CardTitle>
+                        <CardDescription className="font-bold text-slate-400 text-[10px] uppercase tracking-wider">PROJECT CONTEXT AND OBJECTIVES</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="p-5 space-y-5">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Project Name</Label>
+                            <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Project Name</Label>
                             <Input
                                 id="name"
                                 placeholder="Ex: NextGen Portal Migration"
-                                className="h-12 text-lg font-medium"
+                                className="h-10 text-sm font-bold border-slate-200"
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="desc">Description</Label>
+                            <Label htmlFor="desc" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Description</Label>
                             <Textarea
                                 id="desc"
                                 placeholder="Provide context about the handover objective..."
-                                className="min-h-[120px] resize-none"
+                                className="min-h-[100px] resize-none text-sm font-bold border-slate-200"
                                 value={formData.description}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                             />
                         </div>
                     </CardContent>
-                    <CardFooter className="flex justify-end pt-4 border-t">
-                        <Button onClick={handleNext} disabled={!formData.name} className="h-12 px-8 rounded-xl font-bold">
-                            Assign Team <ChevronRight className="ml-2 w-4 h-4" />
+                    <CardFooter className="p-5 flex justify-end border-t border-slate-50">
+                        <Button onClick={handleNext} disabled={!formData.name} className="h-10 px-6 rounded-xl font-bold uppercase tracking-wider text-[10px] bg-slate-900 text-white shadow-lg shadow-slate-200">
+                            Assign Team <ChevronRight className="ml-2 w-3.5 h-3.5" />
                         </Button>
                     </CardFooter>
                 </Card>
@@ -129,14 +142,14 @@ export default function CreateProject() {
 
             {step === 2 && (
                 <Card className="shadow-xl border-none ring-1 ring-slate-200">
-                    <CardHeader className="space-y-1 pb-8">
-                        <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-4">
-                            <UserPlus className="w-6 h-6" />
+                    <CardHeader className="p-5 pb-5 border-b border-slate-50">
+                        <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center mb-3">
+                            <UserPlus className="w-5 h-5" />
                         </div>
-                        <CardTitle className="text-2xl font-bold">Assign Team & Roles</CardTitle>
-                        <CardDescription>Select team members and define their responsibility in this KT.</CardDescription>
+                        <CardTitle className="text-base font-black text-slate-800 uppercase tracking-tight">Assign Team & Roles</CardTitle>
+                        <CardDescription className="font-bold text-slate-400 text-[10px] uppercase tracking-wider">SELECT TEAM MEMBERS AND RESPONSIBILITIES</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-8">
+                    <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {availableUsers.map(u => {
                                 const selected = formData.members.find(m => m.userId === u.id);
@@ -161,8 +174,8 @@ export default function CreateProject() {
                         </div>
 
                         {formData.members.length > 0 && (
-                            <div className="space-y-4 pt-4">
-                                <h3 className="text-sm font-bold text-slate-600 border-l-4 border-orange-500 pl-3">Define KT Responsibilities</h3>
+                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Define KT Responsibilities</h3>
                                 <div className="space-y-3">
                                     {formData.members.map(m => (
                                         <div key={m.userId} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
@@ -188,12 +201,12 @@ export default function CreateProject() {
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="flex justify-between pt-4 border-t">
-                        <Button variant="ghost" onClick={handleBack} className="h-12 px-8 rounded-xl font-bold">
+                    <CardFooter className="p-5 flex justify-between border-t border-slate-50">
+                        <Button variant="ghost" onClick={handleBack} className="h-10 px-6 rounded-xl font-bold uppercase tracking-wider text-[10px]">
                             Back
                         </Button>
-                        <Button onClick={handleNext} disabled={formData.members.length === 0} className="h-12 px-8 rounded-xl font-bold bg-slate-900 group">
-                            Map Sections <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-all" />
+                        <Button onClick={handleNext} disabled={formData.members.length === 0} className="h-10 px-6 rounded-xl font-bold uppercase tracking-wider text-[10px] bg-slate-900 text-white shadow-lg shadow-slate-200">
+                            Map Sections <ChevronRight className="ml-2 w-3.5 h-3.5 group-hover:translate-x-1 transition-all" />
                         </Button>
                     </CardFooter>
                 </Card>
@@ -201,14 +214,14 @@ export default function CreateProject() {
 
             {step === 3 && (
                 <Card className="shadow-xl border-none ring-1 ring-slate-200">
-                    <CardHeader className="space-y-1 pb-8">
-                        <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4">
-                            <ShieldCheck className="w-6 h-6" />
+                    <CardHeader className="p-5 pb-5 border-b border-slate-50">
+                        <div className="w-10 h-10 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mb-3">
+                            <ShieldCheck className="w-5 h-5" />
                         </div>
-                        <CardTitle className="text-2xl font-bold">Section Mapping</CardTitle>
-                        <CardDescription>Assign specific KT sections to team members.</CardDescription>
+                        <CardTitle className="text-base font-black text-slate-800 uppercase tracking-tight">Section Mapping</CardTitle>
+                        <CardDescription className="font-bold text-slate-400 text-[10px] uppercase tracking-wider">ASSIGN PROTOCOL SECTIONS TO CONTRIBUTORS</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-8">
+                    <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 gap-4">
                             {templates.map(t => {
                                 const selected = formData.sections.find(s => s.id === t.id);
@@ -238,8 +251,8 @@ export default function CreateProject() {
                                                                 key={m.userId}
                                                                 onClick={() => assignContributor(t.id, m.userId)}
                                                                 className={`px-4 py-2 rounded-full text-xs font-bold border transition-all ${currentContributorId === m.userId
-                                                                        ? 'bg-green-600 border-green-600 text-white shadow-lg -translate-y-0.5'
-                                                                        : 'bg-white border-slate-200 text-slate-600 hover:border-green-300'
+                                                                    ? 'bg-green-600 border-green-600 text-white shadow-lg -translate-y-0.5'
+                                                                    : 'bg-white border-slate-200 text-slate-600 hover:border-green-300'
                                                                     }`}
                                                             >
                                                                 {m.name} ({m.ktRole})
@@ -254,14 +267,14 @@ export default function CreateProject() {
                             })}
                         </div>
                     </CardContent>
-                    <CardFooter className="flex justify-between pt-4 border-t">
-                        <Button variant="ghost" onClick={handleBack} className="h-12 px-8 rounded-xl font-bold">
+                    <CardFooter className="p-5 flex justify-between border-t border-slate-50">
+                        <Button variant="ghost" onClick={handleBack} className="h-10 px-6 rounded-xl font-bold uppercase tracking-wider text-[10px]">
                             Back
                         </Button>
                         <Button
                             onClick={handleSubmit}
                             disabled={formData.sections.length === 0 || formData.sections.some(s => !s.contributorId)}
-                            className="h-12 px-8 rounded-xl font-bold bg-blue-600 shadow-lg shadow-blue-200 animate-pulse-subtle hover:scale-105 transition-all"
+                            className="h-10 px-6 rounded-xl font-bold uppercase tracking-wider text-[10px] bg-blue-600 text-white shadow-lg shadow-blue-200 animate-pulse-subtle hover:scale-105 transition-all"
                         >
                             Finalize & Launch Project
                         </Button>

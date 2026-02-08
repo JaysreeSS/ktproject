@@ -1,10 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-// Initialize Supabase client (replace with your actual URL and anon key)
-const supabaseUrl = "https://YOUR_SUPABASE_PROJECT.supabase.co";
-const supabaseAnonKey = "YOUR_PUBLIC_ANON_KEY";
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from "@/lib/supabase";
 
 const ProjectContext = createContext(undefined);
 
@@ -76,9 +71,45 @@ export const ProjectProvider = ({ children }) => {
                     });
                     const understoodCount = updatedSections.filter((s) => s.status === "Understood").length;
                     const completion = Math.round((understoodCount / updatedSections.length) * 100);
-                    // Sync to Supabase (replace whole project row)
-                    supabase.from("projects").update({ sections: updatedSections, completion }).eq("id", projectId);
-                    return { ...p, sections: updatedSections, completion };
+
+                    // Bug Fix: Transition status forward if work has started
+                    let nextStatus = p.status || 'Not Started';
+                    // Check against 'Not Started' OR 'Active' (default fallback in some views)
+                    if ((nextStatus === 'Not Started' || nextStatus === 'Active') && (status === 'Ready for Review' || status === 'Understood')) {
+                        nextStatus = 'In Progress';
+                    }
+
+                    // Sync to Supabase
+                    supabase.from("projects").update({
+                        sections: updatedSections,
+                        completion,
+                        status: nextStatus
+                    }).eq("id", projectId);
+
+                    return { ...p, sections: updatedSections, completion, status: nextStatus };
+                }
+                return p;
+            })
+        );
+    };
+
+    // Remove an attachment from a section
+    const removeAttachment = async (projectId, sectionId, attachmentId) => {
+        setProjects((prev) =>
+            prev.map((p) => {
+                if (p.id === projectId) {
+                    const updatedSections = p.sections.map((s) => {
+                        if (s.id === sectionId) {
+                            return {
+                                ...s,
+                                attachments: (s.attachments || []).filter(a => a.id !== attachmentId)
+                            };
+                        }
+                        return s;
+                    });
+                    // Sync to Supabase
+                    supabase.from("projects").update({ sections: updatedSections }).eq("id", projectId);
+                    return { ...p, sections: updatedSections };
                 }
                 return p;
             })
@@ -118,9 +149,158 @@ export const ProjectProvider = ({ children }) => {
         setProjects((prev) => prev.filter((p) => p.id !== projectId));
     };
 
+    // Update member details (e.g., functional role)
+    const updateMember = async (projectId, memberId, updates) => {
+        setProjects((prev) =>
+            prev.map((p) => {
+                if (p.id === projectId) {
+                    const updatedMembers = p.members.map((m) => {
+                        if (m.userId === memberId || m.id === memberId) {
+                            return { ...m, ...updates };
+                        }
+                        return m;
+                    });
+                    // Sync to Supabase
+                    supabase.from("projects").update({ members: updatedMembers }).eq("id", projectId);
+                    return { ...p, members: updatedMembers };
+                }
+                return p;
+            })
+        );
+    };
+
+    // Add a new member to the project
+    const addMember = async (projectId, memberData) => {
+        setProjects((prev) =>
+            prev.map((p) => {
+                if (p.id === projectId) {
+                    const updatedMembers = [...p.members, memberData];
+                    // Sync to Supabase
+                    supabase.from("projects").update({ members: updatedMembers }).eq("id", projectId);
+                    return { ...p, members: updatedMembers };
+                }
+                return p;
+            })
+        );
+    };
+
+    // Add an attachment to a section and sync
+    const addAttachment = async (projectId, sectionId, attachment) => {
+        setProjects((prev) =>
+            prev.map((p) => {
+                if (p.id === projectId) {
+                    const updatedSections = p.sections.map((s) => {
+                        if (s.id === sectionId) {
+                            const newAttachment = { ...attachment, id: Date.now().toString(), uploadedAt: new Date().toISOString() };
+                            return { ...s, attachments: [...(s.attachments || []), newAttachment] };
+                        }
+                        return s;
+                    });
+                    // Sync to Supabase
+                    supabase.from("projects").update({ sections: updatedSections }).eq("id", projectId);
+                    return { ...p, sections: updatedSections };
+                }
+                return p;
+            })
+        );
+    };
+
+    // Add a new section to a project
+    const addSection = async (projectId, sectionData) => {
+        setProjects((prev) =>
+            prev.map((p) => {
+                if (p.id === projectId) {
+                    const newSection = {
+                        ...sectionData,
+                        id: 'sec_' + Date.now().toString(),
+                        status: 'Draft',
+                        content: '',
+                        attachments: [],
+                        comments: []
+                    };
+                    const updatedSections = [...p.sections, newSection];
+                    // Sync to Supabase
+                    supabase.from("projects").update({ sections: updatedSections }).eq("id", projectId);
+                    return { ...p, sections: updatedSections };
+                }
+                return p;
+            })
+        );
+    };
+
+    // Remove a section from a project
+    const removeSection = async (projectId, sectionId) => {
+        setProjects((prev) =>
+            prev.map((p) => {
+                if (p.id === projectId) {
+                    const updatedSections = p.sections.filter(s => s.id !== sectionId);
+                    // Recalculate completion
+                    const understoodCount = updatedSections.filter((s) => s.status === "Understood").length;
+                    const completion = updatedSections.length > 0 ? Math.round((understoodCount / updatedSections.length) * 100) : 0;
+
+                    // Sync to Supabase
+                    supabase.from("projects").update({ sections: updatedSections, completion }).eq("id", projectId);
+                    return { ...p, sections: updatedSections, completion };
+                }
+                return p;
+            })
+        );
+    };
+
+    // Update generic section details (e.g., contributor assignment)
+    const updateSection = async (projectId, sectionId, updates) => {
+        setProjects((prev) =>
+            prev.map((p) => {
+                if (p.id === projectId) {
+                    const updatedSections = p.sections.map((s) => {
+                        if (s.id === sectionId) {
+                            return { ...s, ...updates };
+                        }
+                        return s;
+                    });
+                    // Sync to Supabase
+                    supabase.from("projects").update({ sections: updatedSections }).eq("id", projectId);
+                    return { ...p, sections: updatedSections };
+                }
+                return p;
+            })
+        );
+    };
+
+    // Remove a member from the project
+    const removeMember = async (projectId, memberId) => {
+        setProjects((prev) =>
+            prev.map((p) => {
+                if (p.id === projectId) {
+                    const updatedMembers = p.members.filter((m) => m.userId !== memberId && m.id !== memberId);
+                    // Sync to Supabase
+                    supabase.from("projects").update({ members: updatedMembers }).eq("id", projectId);
+                    return { ...p, members: updatedMembers };
+                }
+                return p;
+            })
+        );
+    };
+
     return (
         <ProjectContext.Provider
-            value={{ projects, createProject, updateProjectStatus, updateSectionStatus, addComment, deleteProject, loading }}
+            value={{
+                projects,
+                createProject,
+                updateProjectStatus,
+                updateSectionStatus,
+                addComment,
+                deleteProject,
+                updateMember,
+                addMember,
+                removeMember,
+                addAttachment,
+                removeAttachment,
+                addSection,
+                removeSection,
+                updateSection,
+                loading
+            }}
         >
             {children}
         </ProjectContext.Provider>
