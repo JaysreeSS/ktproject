@@ -11,12 +11,12 @@ const initialUsers = [
 ];
 
 const initialTemplates = [
-    { id: "t1", title: "Project Overview & Scope", sections: [], description: "Define the project's high-level goals and limits.", order: 1 },
-    { id: "t2", title: "System Architecture & Flows", sections: [], description: "Detail technical architecture and data flows.", order: 2 },
-    { id: "t3", title: "Daily Workflows & Responsibilities", sections: [], order: 3 },
-    { id: "t4", title: "Known Issues, Risks, and Dependencies", sections: [], order: 4 },
-    { id: "t5", title: "Required Tools/Access (Reference Only)", sections: [], order: 5 },
-    { id: "t6", title: "Supporting Documents", sections: [], order: 6 },
+    { id: "t1", title: "Project Overview & Scope", sections: [], description: "Define the project's high-level goals and limits.", order: 1, input_type: ['text', 'file'] },
+    { id: "t2", title: "System Architecture & Flows", sections: [], description: "Detail technical architecture and data flows.", order: 2, input_type: ['text', 'file'] },
+    { id: "t3", title: "Daily Workflows & Responsibilities", sections: [], order: 3, input_type: ['text', 'file'] },
+    { id: "t4", title: "Known Issues, Risks, and Dependencies", sections: [], order: 4, input_type: ['text', 'file'] },
+    { id: "t5", title: "Required Tools/Access (Reference Only)", sections: [], order: 5, input_type: ['text', 'file'] },
+    { id: "t6", title: "Supporting Documents", sections: [], order: 6, input_type: ['text', 'file'] },
 ];
 
 const AdminContext = createContext(undefined);
@@ -53,7 +53,12 @@ export const AdminProvider = ({ children }) => {
                 .order('order', { ascending: true });
 
             if (!templatesError && templatesData && templatesData.length > 0) {
-                setTemplates(templatesData);
+                // Ensure input_type exists for existing records
+                const normalizedTemplates = templatesData.map(t => ({
+                    ...t,
+                    input_type: t.input_type || ['text', 'file']
+                }));
+                setTemplates(normalizedTemplates);
             } else {
                 console.error("Using fallback templates due to:", templatesError || "No templates found in DB");
                 setTemplates(initialTemplates);
@@ -152,6 +157,7 @@ export const AdminProvider = ({ children }) => {
                     title: newTemplate.title,
                     description: newTemplate.description || '',
                     attachment_url: newTemplate.attachment_url || '',
+                    input_type: newTemplate.input_type || ['text', 'file'],
                     order: maxOrder + 1
                 }])
                 .select();

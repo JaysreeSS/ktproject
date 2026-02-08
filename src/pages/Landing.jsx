@@ -62,7 +62,7 @@ export default function Landing() {
                             className="h-10 w-auto opacity-90 grayscale-[0.2]"
                         />
                     </div>
-                    <h1 className="text-xl font-bold tracking-tight text-slate-800">
+                    <h1 className="text-lg font-black tracking-tight text-slate-800 uppercase">
                         Knowledge Transfer Portal
                     </h1>
                 </header>
@@ -72,7 +72,7 @@ export default function Landing() {
                     <CardContent className="p-8 pt-8">
                         <form onSubmit={handleLogin} className="space-y-5">
                             <div className="space-y-2">
-                                <Label htmlFor="username" className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
+                                <Label htmlFor="username" className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
                                     System ID
                                 </Label>
                                 <Input
@@ -80,13 +80,13 @@ export default function Landing() {
                                     placeholder="Enter your username"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    className="h-10 rounded-lg bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all font-medium text-slate-900"
+                                    className="h-10 rounded-lg bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 text-sm"
                                     required
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="password" className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
+                                <Label htmlFor="password" className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
                                     Password
                                 </Label>
                                 <div className="relative">
@@ -96,7 +96,7 @@ export default function Landing() {
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="h-10 rounded-lg bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all pr-10 text-slate-900"
+                                        className="h-10 rounded-lg bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all pr-10 text-slate-900 font-bold text-sm"
                                     />
                                     <button
                                         type="button"
@@ -109,7 +109,7 @@ export default function Landing() {
                             </div>
 
                             {error && (
-                                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-xs font-medium text-center animate-in fade-in">
+                                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest text-center animate-in fade-in">
                                     {error}
                                 </div>
                             )}
@@ -133,7 +133,7 @@ export default function Landing() {
 
                 {/* Footer - Contained within layout */}
                 <footer className="mt-8 text-center space-y-2">
-                    <p className="text-[10px] text-slate-400 font-medium">
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">
                         © {new Date().getFullYear()} Ideassion KT Portal
                     </p>
                     <div className="flex justify-center gap-4 text-[10px] text-slate-300 font-bold uppercase tracking-widest">

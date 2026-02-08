@@ -33,6 +33,7 @@ export default function UserManagement({ isEmbedded = false }) {
         if (editingId) {
             updateUser(editingId, formData);
             setEditingId(null);
+            setIsAdding(false);
         } else {
             addUser(formData);
             setIsAdding(false);
@@ -59,35 +60,19 @@ export default function UserManagement({ isEmbedded = false }) {
     };
 
     return (
-        <div className={`p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 ${isEmbedded ? 'p-10' : ''}`}>
+        <div className={`p-5 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700 ${isEmbedded ? 'p-10' : ''}`}>
             {!isEmbedded && (
-                <div className="flex items-center justify-between">
-                    <Button variant="ghost" onClick={() => navigate('/admin')} className="rounded-full">
-                        <ChevronLeft className="w-4 h-4 mr-1" /> Back to Portal
-                    </Button>
-                    <div className="flex gap-4">
-                        {!isAdding && (
-                            <Button onClick={() => setIsAdding(true)} className="bg-primary shadow-lg shadow-primary/20 rounded-xl px-6 font-bold h-11">
-                                <UserPlus className="w-4 h-4 mr-2" /> New User
-                            </Button>
-                        )}
-                    </div>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <header className="space-y-1">
+                        <h1 className="text-2xl font-black text-slate-800 tracking-tight uppercase">Users</h1>
+                        <p className="text-slate-500 font-bold text-sm leading-relaxed max-w-lg">Manage user accounts and roles.</p>
+                    </header>
+                    {!isAdding && (
+                        <Button onClick={() => setIsAdding(true)} className="bg-slate-900 text-white shadow-lg shadow-slate-200 rounded-xl px-6 font-bold h-10 shrink-0 text-[10px] uppercase tracking-wider">
+                            <UserPlus className="w-4 h-4 mr-2" /> New User
+                        </Button>
+                    )}
                 </div>
-            )}
-
-            {isEmbedded && !isAdding && (
-                <div className="flex justify-end">
-                    <Button onClick={() => setIsAdding(true)} className="bg-primary shadow-lg shadow-primary/20 rounded-xl px-6 font-bold h-11">
-                        <UserPlus className="w-4 h-4 mr-2" /> New User
-                    </Button>
-                </div>
-            )}
-
-            {!isEmbedded && (
-                <header>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Identity & Access</h1>
-                    <p className="text-slate-500 mt-2 font-medium">Manage corporate identities, functional roles, and system permissions.</p>
-                </header>
             )}
 
             {isMockData && (
@@ -97,8 +82,8 @@ export default function UserManagement({ isEmbedded = false }) {
                             <ShieldCheck className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="text-amber-900 font-black">Running on Mock Data</h3>
-                            <p className="text-amber-700 text-sm font-medium">Your Supabase connection is active but the database appears to be empty.</p>
+                            <h3 className="text-amber-900 font-black text-base uppercase tracking-tight">Running on Mock Data</h3>
+                            <p className="text-amber-700 text-sm font-bold leading-relaxed">Your Supabase connection is active but the database appears to be empty.</p>
                         </div>
                     </div>
                     <Button
@@ -119,43 +104,43 @@ export default function UserManagement({ isEmbedded = false }) {
 
             {isAdding && (
                 <Card className="shadow-2xl border-none ring-1 ring-slate-200 rounded-[2rem] overflow-hidden">
-                    <CardHeader className="bg-primary/5 border-b border-slate-100 p-8">
-                        <CardTitle className="text-xl font-black text-slate-800 tracking-tight">
-                            {editingId ? 'Modify User Profile' : 'Provision New Identity'}
+                    <CardHeader className="bg-primary/5 border-b border-slate-100 p-5">
+                        <CardTitle className="text-lg font-black text-slate-800 uppercase tracking-tight">
+                            {editingId ? 'Edit User' : 'Add New User'}
                         </CardTitle>
-                        <CardDescription>Enter the user credentials and assign a system-wide functional role.</CardDescription>
+                        <CardDescription className="text-xs font-bold text-slate-400">Enter user details and assign a role.</CardDescription>
                     </CardHeader>
-                    <CardContent className="p-8 space-y-6">
+                    <CardContent className="p-5 space-y-5">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Username</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Username</label>
                                 <Input
                                     value={formData.username}
                                     onChange={e => setFormData({ ...formData, username: e.target.value })}
                                     placeholder="e.g. jdoe"
-                                    className="bg-slate-50 border-none h-12 rounded-xl focus-visible:ring-primary font-bold"
+                                    className="bg-slate-50 border-none h-12 rounded-xl focus-visible:ring-primary font-bold text-sm"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Password</label>
                                 <Input
                                     value={formData.password}
                                     onChange={e => setFormData({ ...formData, password: e.target.value })}
                                     placeholder="Set temporary password"
-                                    className="bg-slate-50 border-none h-12 rounded-xl focus-visible:ring-primary font-bold"
+                                    className="bg-slate-50 border-none h-12 rounded-xl focus-visible:ring-primary font-bold text-sm"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Full Name</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Full Name</label>
                                 <Input
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="John Doe"
-                                    className="bg-slate-50 border-none h-12 rounded-xl focus-visible:ring-primary font-bold"
+                                    className="bg-slate-50 border-none h-12 rounded-xl focus-visible:ring-primary font-bold text-sm"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Functional Role</label>
+                                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Role</label>
                                 <select
                                     value={formData.role}
                                     onChange={e => {
@@ -179,7 +164,7 @@ export default function UserManagement({ isEmbedded = false }) {
                             </div>
                         </div>
                     </CardContent>
-                    <CardFooter className="bg-primary/5 border-t border-slate-100 p-8 flex justify-end gap-3">
+                    <CardFooter className="bg-primary/5 border-t border-slate-100 p-5 flex justify-end gap-3">
                         <Button variant="ghost" onClick={cancel} className="rounded-xl font-bold">Cancel</Button>
                         <Button onClick={handleSave} className="bg-slate-900 shadow-xl shadow-slate-200 rounded-xl px-8 font-bold h-12">
                             {editingId ? 'Update User' : 'Add User'}
@@ -188,75 +173,97 @@ export default function UserManagement({ isEmbedded = false }) {
                 </Card>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {users.map((u) => (
-                    <Card key={u.id} className="group hover:shadow-xl transition-all duration-300 border-slate-200 dark:border-slate-800 rounded-[2rem] overflow-hidden">
-                        <CardHeader className="pb-4">
-                            <div className="flex justify-between items-start">
-                                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500">
-                                    <User className="w-7 h-7" />
-                                </div>
-                                <div className="flex gap-2">
-                                    <Button variant="ghost" size="icon" className="rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => startEdit(u)}>
-                                        <UserCog className="w-4 h-4 text-slate-400" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-50 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteUser(u.id)}>
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
+            {/* Categorized User List */}
+            {/* Categorized User List */}
+            <div className="space-y-12 pb-20">
+                {[
+                    {
+                        title: "Admins",
+                        items: users.filter(u => u.isAdmin || u.role === 'admin'),
+                        icon: ShieldCheck,
+                        color: "text-indigo-600"
+                    },
+                    {
+                        title: "Managers & Team Leads",
+                        items: users.filter(u => !u.isAdmin && u.role === 'manager'),
+                        icon: UserCog,
+                        color: "text-emerald-600"
+                    },
+                    {
+                        title: "Functional Roles",
+                        items: users.filter(u => !u.isAdmin && u.role !== 'manager' && u.role !== 'admin'),
+                        icon: User,
+                        color: "text-blue-600"
+                    }
+                ].map((category) => category.items.length > 0 && (
+                    <div key={category.title} className="space-y-6">
+                        <div className="flex items-center gap-3 px-2">
+                            <div className={`p-2 rounded-lg bg-white shadow-sm ring-1 ring-slate-100 ${category.color}`}>
+                                <category.icon className="w-5 h-5" />
                             </div>
-                            <div className="pt-4">
-                                <CardTitle className="text-xl font-black text-slate-900">{u.name}</CardTitle>
-                                <CardDescription className="flex items-center gap-2 mt-1">
-                                    <Mail className="w-3 h-3 opacity-40" /> {u.username}@ideassion.com
-                                </CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex flex-wrap gap-2">
-                                <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none font-bold uppercase tracking-widest text-[9px] px-3 py-1">
-                                    {u.role || 'Contributor'}
-                                </Badge>
-                                {u.isAdmin && (
-                                    <Badge className="bg-primary text-primary-foreground border-none font-bold uppercase tracking-widest text-[9px] px-3 py-1">
-                                        System Admin
-                                    </Badge>
-                                )}
-                            </div>
+                            <h2 className="text-lg font-black text-slate-800 tracking-tight uppercase">{category.title}</h2>
+                            <div className="h-[1px] flex-1 bg-slate-100 ml-4" />
+                            <Badge variant="outline" className="ml-auto bg-white text-slate-500 border-slate-200 font-bold px-3 text-sm uppercase tracking-wider">
+                                {category.items.length} Users
+                            </Badge>
+                        </div>
 
-                            {/* Credentials Display */}
-                            <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 mt-2">
-                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Access Credentials</p>
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-0.5">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] uppercase font-bold text-slate-500 w-16">Username:</span>
-                                            <code className="text-xs font-bold text-slate-700 bg-slate-200/50 px-1 rounded">{u.username}</code>
+                        <div className="space-y-3">
+                            {category.items.map((u) => (
+                                <Card key={u.id} className="group hover:shadow-md transition-all duration-300 border-none shadow-sm shadow-slate-200/50 rounded-2xl overflow-hidden bg-white/80 backdrop-blur">
+                                    <div className="p-4 flex items-center gap-6">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all duration-500 shrink-0 border border-slate-200">
+                                            <User className="w-5 h-5" />
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] uppercase font-bold text-slate-500 w-16">Password:</span>
-                                            <code className="text-xs font-bold text-slate-700 bg-slate-200/50 px-1 rounded transition-all min-w-[60px]">
-                                                {visiblePasswords[u.id] ? (u.password || u.username) : '••••••••'}
-                                            </code>
+
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-3">
+                                                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight">{u.name}</h3>
+                                                <Badge variant="secondary" className="bg-slate-100 text-slate-500 border-none font-bold uppercase tracking-wider text-[9px] px-2 py-0.5">
+                                                    {u.role || 'Contributor'}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                                                    ID: {u.id.substring(0, 8)}...
+                                                </p>
+                                                <p className="lg:hidden text-[9px] text-primary/60 font-black uppercase tracking-widest bg-primary/5 px-2 rounded">
+                                                    @{u.username}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="hidden lg:flex items-center gap-6 px-6 border-x border-slate-100 h-8">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Username:</span>
+                                                <code className="bg-slate-50 px-1.5 py-0.5 rounded text-[10px] font-bold text-slate-600 border border-slate-100">{u.username}</code>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Password:</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <code className="bg-slate-50 px-1.5 py-0.5 rounded text-[10px] font-bold text-slate-600 border border-slate-100 min-w-[70px]">
+                                                        {visiblePasswords[u.id] ? (u.password || u.username) : '••••••••'}
+                                                    </code>
+                                                    <button onClick={() => togglePassword(u.id)} className="text-slate-300 hover:text-slate-600 transition-colors">
+                                                        {visiblePasswords[u.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600" onClick={() => startEdit(u)}>
+                                                <UserCog className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500" onClick={() => deleteUser(u.id)}>
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
                                         </div>
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-sm"
-                                        onClick={() => togglePassword(u.id)}
-                                    >
-                                        {visiblePasswords[u.id] ? (
-                                            <EyeOff className="w-3 h-3 text-slate-400" />
-                                        ) : (
-                                            <Eye className="w-3 h-3 text-slate-400" />
-                                        )}
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-
-                    </Card>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
                 ))}
             </div>
         </div>
