@@ -4,6 +4,8 @@ import { LayoutDashboard, Users, FileText, FolderKanban, ChevronLeft, ChevronRig
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import Footer from "./Footer";
+import logo from '../assets/logo.png';
+import logoSmall from '../assets/logo-small.png';
 
 export default function AdminLayout() {
     const [collapsed, setCollapsed] = useState(false);
@@ -54,7 +56,7 @@ export default function AdminLayout() {
                 {/* Logo Area */}
                 <div className={`flex items-center px-6 border-b border-slate-50 transition-all duration-300 ${collapsed ? 'h-20 justify-center' : 'h-24 flex-col justify-center items-start'}`}>
                     <img
-                        src={collapsed ? "/src/assets/logo-small.png" : "/src/assets/logo.png"}
+                        src={collapsed ? logoSmall : logo}
                         alt="Logo"
                         className={`transition-all duration-300 object-contain ${collapsed ? 'h-8 w-8' : 'h-8'}`}
                     />
@@ -160,7 +162,7 @@ export default function AdminLayout() {
                     }`}
             >
                 <div className="h-20 flex items-center px-6 border-b border-slate-50">
-                    <img src="/src/assets/logo.png" alt="Logo" className="h-7" />
+                    <img src={logo} alt="Logo" className="h-7" />
                     <button
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="ml-auto p-2 text-slate-400 hover:text-slate-600 focus:outline-none"
@@ -216,7 +218,7 @@ export default function AdminLayout() {
                                 <span className="h-0.5 w-2/3 bg-current rounded-full" />
                             </div>
                         </button>
-                        <img src="/src/assets/logo.png" alt="Logo" className="h-6" />
+                        <img src={logo} alt="Logo" className="h-6" />
                     </div>
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-black text-[10px]">
                         {user?.name?.substring(0, 2).toUpperCase()}

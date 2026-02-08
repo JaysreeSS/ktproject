@@ -5,6 +5,7 @@ import { Folder, LogOut, Activity, Send, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
+import logo from '../assets/logo.png';
 
 export default function ManagerLayout() {
     const { user, logout } = useAuth();
@@ -42,7 +43,7 @@ export default function ManagerLayout() {
                     </button>
 
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/manager')}>
-                        <img src="/src/assets/logo.png" alt="Logo" className="h-7 md:h-8" />
+                        <img src={logo} alt="Logo" className="h-7 md:h-8" />
                         <span className="font-black text-slate-800 tracking-tight uppercase text-base hidden sm:block">KT Portal</span>
                     </div>
 
@@ -98,7 +99,7 @@ export default function ManagerLayout() {
                     }`}
             >
                 <div className="h-20 flex items-center px-6 border-b border-slate-50">
-                    <img src="/src/assets/logo.png" alt="Logo" className="h-7" />
+                    <img src={logo} alt="Logo" className="h-7" />
                     <button
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="ml-auto p-2 text-slate-400 hover:text-slate-600 focus:outline-none"
