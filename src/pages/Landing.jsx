@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import logo from '../assets/logo.png';
 
 export default function Landing() {
     const { login } = useAuth();
@@ -57,7 +58,7 @@ export default function Landing() {
                 <header className="text-center mb-8 space-y-3">
                     <div className="flex justify-center mb-4">
                         <img
-                            src="/src/assets/logo.png"
+                            src={logo}
                             alt="Logo"
                             className="h-10 w-auto opacity-90 grayscale-[0.2]"
                         />
