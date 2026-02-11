@@ -25,8 +25,10 @@ import {
     Plus,
     UserPlus,
     Pencil,
-    X
+    X,
+    FileDown
 } from 'lucide-react';
+import { exportProjectToPDF } from '../lib/pdfExport';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 
 export default function ProjectDetails() {
@@ -68,10 +70,10 @@ export default function ProjectDetails() {
     const isManager = project.managerId === user.id;
     const isAdmin = user.isAdmin;
 
-    // Calculation for overall progress (Only Understood sections)
-    const totalSections = project.sections.length;
-    const understoodSections = project.sections.filter(s => s.status === 'Understood').length;
-    const overallProgress = totalSections > 0 ? Math.round((understoodSections / totalSections) * 100) : 0;
+    // Use persisted progress from database/context
+    const overallProgress = project.completion || 0;
+    const totalSections = project.sections?.length || 0;
+    const understoodSections = project.sections?.filter(s => s.status === 'Understood').length || 0;
 
     const handleCloseProject = () => {
         if (window.confirm("Perform final institutional sign-off? This will archive the project as read-only.")) {
@@ -100,7 +102,7 @@ export default function ProjectDetails() {
     };
 
     return (
-        <div className="p-5 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700">
+        <div className="px-8 md:px-12 py-6 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex flex-col gap-1">
                     <Button
@@ -123,12 +125,21 @@ export default function ProjectDetails() {
                             Finish Project
                         </Button>
                     )}
-                    <Badge variant="outline" className={`rounded-xl px-4 py-1.5 font-bold text-xs uppercase tracking-wide border-2 ${project.status === 'Completed' ? 'bg-slate-50 text-slate-500 border-slate-200' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
-                        {project.status === 'Completed' ? 'Signed Off' : 'Active'}
+                    {isAdmin && project.status === 'Completed' && (
+                        <Button
+                            onClick={() => exportProjectToPDF(project)}
+                            className="rounded-xl bg-slate-900 hover:bg-black text-white font-bold uppercase tracking-widest text-xs h-10 px-6 shadow-lg shadow-slate-200"
+                        >
+                            <FileDown className="w-4 h-4 mr-2" /> Export Report
+                        </Button>
+                    )}
+                    <Badge variant="outline" className={`rounded-xl px-4 py-1.5 font-bold text-xs uppercase tracking-wide border-2 ${project.status === 'Completed' ? 'bg-slate-50 text-slate-500 border-slate-200' :
+                        project.status === 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                            'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                        {project.status === 'Completed' ? 'Signed Off' : (project.status || 'Active')}
                     </Badge>
                 </div>
             </div>
-
             {/* Top Project Summary Section */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
                 <Card className="xl:col-span-2 shadow-xl border-none ring-1 ring-slate-100 rounded-[2rem] overflow-hidden bg-white h-full flex flex-col">
@@ -191,7 +202,11 @@ export default function ProjectDetails() {
                                             </div>
                                             {isManagingTeam && isManager && (
                                                 <button
-                                                    onClick={() => removeMember(project.id, m.userId)}
+                                                    onClick={() => {
+                                                        if (window.confirm(`Remove ${m.name} from this project?`)) {
+                                                            removeMember(project.id, m.id);
+                                                        }
+                                                    }}
                                                     className="ml-2 p-1 text-slate-300 hover:text-red-500 transition-colors"
                                                 >
                                                     <X className="w-3 h-3" />
@@ -221,9 +236,12 @@ export default function ProjectDetails() {
                                                 }}
                                             >
                                                 <option value="">Select User...</option>
-                                                {allUsers.filter(u => !project.members.find(m => m.userId === u.id)).map(u => (
-                                                    <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
-                                                ))}
+                                                {allUsers
+                                                    .filter(u => !u.isAdmin && u.role !== 'admin')
+                                                    .filter(u => !project.members.find(m => m.userId === u.id))
+                                                    .map(u => (
+                                                        <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
+                                                    ))}
                                             </select>
 
                                             <select
@@ -231,9 +249,12 @@ export default function ProjectDetails() {
                                                 value={newMemberKtRole}
                                                 onChange={(e) => setNewMemberKtRole(e.target.value)}
                                             >
-                                                <option value="Contributor">Contributor</option>
-                                                <option value="Initiator">Initiator</option>
-                                                <option value="Receiver">Receiver</option>
+                                                {['Contributor', 'Initiator', 'Receiver']
+                                                    .filter(role => !(newMemberFunctionalRole?.toLowerCase() === 'manager' && role === 'Receiver'))
+                                                    .map(role => (
+                                                        <option key={role} value={role}>{role}</option>
+                                                    ))
+                                                }
                                             </select>
 
 
@@ -284,7 +305,6 @@ export default function ProjectDetails() {
                             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">Overall Progress</CardTitle>
                             <ShieldCheck className="w-6 h-6 text-primary" />
                         </div>
-                        <CardDescription className="text-slate-500 text-[9px] font-bold mt-1 uppercase tracking-wider">Confirmed by Receiver</CardDescription>
                     </CardHeader>
                     <CardContent className="p-5 flex flex-col items-center justify-center space-y-6 relative z-10 flex-1">
                         <div className="relative w-40 h-40 flex items-center justify-center">
@@ -333,7 +353,6 @@ export default function ProjectDetails() {
                             <Activity className="w-6 h-6 text-primary" />
                             Project Sections
                         </CardTitle>
-                        <CardDescription className="text-slate-500 font-bold mt-1 uppercase text-xs tracking-wide">Track what's been done and what's left</CardDescription>
                     </div>
                     {isManager && project.status !== 'Completed' && (
                         <Button
@@ -350,7 +369,7 @@ export default function ProjectDetails() {
                         <div className="p-10 bg-slate-50 border-y border-slate-100 animate-in slide-in-from-top-4 duration-500">
                             <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Select a Template to Insert</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {templates.filter(t => !project.sections.find(s => s.id === t.id)).map(t => (
+                                {templates.filter(t => !project.sections.find(s => s.title === t.title)).map(t => (
                                     <div
                                         key={t.id}
                                         className="p-6 bg-white rounded-[2rem] border-2 border-slate-100 hover:border-primary hover:shadow-xl transition-all group flex flex-col justify-between"
@@ -362,7 +381,6 @@ export default function ProjectDetails() {
                                                 </div>
                                                 <h4 className="font-black text-slate-800 uppercase text-sm tracking-tight">{t.title}</h4>
                                             </div>
-                                            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{t.description || 'Standard knowledge protocol section.'}</p>
                                         </div>
 
                                         <div className="mt-6 pt-4 border-t border-slate-100 space-y-3">
@@ -402,7 +420,7 @@ export default function ProjectDetails() {
                                         </div>
                                     </div>
                                 ))}
-                                {templates.filter(t => !project.sections.find(s => s.id === t.id)).length === 0 && (
+                                {templates.filter(t => !project.sections.find(s => s.title === t.title)).length === 0 && (
                                     <div className="col-span-full py-10 text-center text-slate-400 font-bold uppercase text-xs tracking-widest">
                                         All templates are already in this protocol
                                     </div>
@@ -480,10 +498,11 @@ export default function ProjectDetails() {
                                                                 {contributor?.ktRole || contributor?.functionalRole || 'Member'}
                                                             </Badge>
                                                         </div>
-                                                        {isManager && project.status !== 'Completed' && (
+                                                        {isManager && project.status !== 'Completed' && progress === 0 && (
                                                             <button
                                                                 className="ml-2 p-2 rounded-lg hover:bg-white text-slate-300 hover:text-primary transition-all shadow-sm opacity-0 group-hover:opacity-100"
                                                                 onClick={() => setEditingSectionId(section.id)}
+                                                                title="Change Assignee"
                                                             >
                                                                 <Pencil className="w-3.5 h-3.5" />
                                                             </button>
@@ -514,18 +533,21 @@ export default function ProjectDetails() {
                                             </td>
                                             {isManager && (
                                                 <td className="p-4 text-right">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="w-10 h-10 rounded-xl hover:bg-red-50 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"
-                                                        onClick={() => {
-                                                            if (window.confirm("Remove this section from the protocol? This action cannot be undone.")) {
-                                                                removeSection(project.id, section.id);
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
+                                                    {progress === 0 && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="w-10 h-10 rounded-xl hover:bg-red-50 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"
+                                                            onClick={() => {
+                                                                if (window.confirm("Remove this section from the protocol? This action cannot be undone.")) {
+                                                                    removeSection(project.id, section.id);
+                                                                }
+                                                            }}
+                                                            title="Delete Section"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    )}
                                                 </td>
                                             )}
                                         </tr>

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Plus, Trash2, ChevronLeft, Layout, Lock, Info, ExternalLink, Paperclip, Loader2, Pencil } from 'lucide-react';
+import { FileText, Plus, Trash2, ChevronLeft, Layout, Lock, Info, ExternalLink, Paperclip, Loader2, Pencil, ChevronUp, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 
@@ -48,10 +48,30 @@ export default function TemplateManagement({ isEmbedded = false }) {
         setNewDescription(template.description || '');
     };
 
+    const moveTemplateUp = async (template, currentIndex) => {
+        if (currentIndex === 0) return;
+        const sortedTemplates = [...templates].sort((a, b) => (a.order || 0) - (b.order || 0));
+        const prevTemplate = sortedTemplates[currentIndex - 1];
+
+        // Swap orders
+        await updateTemplate(template.id, { order: prevTemplate.order });
+        await updateTemplate(prevTemplate.id, { order: template.order });
+    };
+
+    const moveTemplateDown = async (template, currentIndex) => {
+        const sortedTemplates = [...templates].sort((a, b) => (a.order || 0) - (b.order || 0));
+        if (currentIndex === sortedTemplates.length - 1) return;
+        const nextTemplate = sortedTemplates[currentIndex + 1];
+
+        // Swap orders
+        await updateTemplate(template.id, { order: nextTemplate.order });
+        await updateTemplate(nextTemplate.id, { order: template.order });
+    };
+
 
 
     return (
-        <div className={`p-5 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700 ${isEmbedded ? 'p-10' : ''}`}>
+        <div className={`px-8 md:px-12 py-6 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700 ${isEmbedded ? 'px-0 py-0' : ''}`}>
 
 
             {!isEmbedded && (
@@ -126,7 +146,7 @@ export default function TemplateManagement({ isEmbedded = false }) {
                             <p className="font-medium">no sections created</p>
                         </div>
                     )}
-                    {templates.map((t, idx) => (
+                    {[...templates].sort((a, b) => (a.order || 0) - (b.order || 0)).map((t, idx, sortedArray) => (
                         <Card key={t.id} className="group hover:shadow-md transition-all border-none shadow-sm shadow-slate-200/50 rounded-2xl bg-white/80 backdrop-blur">
                             <CardContent className="p-5 flex items-start justify-between">
                                 <div className="flex items-start gap-4">
@@ -157,10 +177,35 @@ export default function TemplateManagement({ isEmbedded = false }) {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-slate-100 text-slate-400" onClick={() => startEdit(t)}>
+                                    {/* Reorder buttons */}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="rounded-full hover:bg-slate-100 text-slate-400 disabled:opacity-30"
+                                        onClick={() => moveTemplateUp(t, idx)}
+                                        disabled={idx === 0}
+                                        title="Move up"
+                                    >
+                                        <ChevronUp className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="rounded-full hover:bg-slate-100 text-slate-400 disabled:opacity-30"
+                                        onClick={() => moveTemplateDown(t, idx)}
+                                        disabled={idx === sortedArray.length - 1}
+                                        title="Move down"
+                                    >
+                                        <ChevronDown className="w-4 h-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-slate-100 text-slate-400" onClick={() => startEdit(t)} title="Edit">
                                         <Pencil className="w-4 h-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-50 hover:text-red-600 text-slate-400" onClick={() => deleteTemplate(t.id)}>
+                                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-50 hover:text-red-600 text-slate-400" onClick={() => {
+                                        if (window.confirm("Remove this section template?")) {
+                                            deleteTemplate(t.id);
+                                        }
+                                    }} title="Delete">
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>

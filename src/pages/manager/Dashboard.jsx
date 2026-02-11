@@ -43,7 +43,7 @@ export default function ManagerDashboard() {
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
             {/* Main Content */}
-            <main className="p-5 max-w-7xl mx-auto space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <main className="px-8 md:px-12 py-6 max-w-7xl mx-auto space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
@@ -130,28 +130,43 @@ export default function ManagerDashboard() {
                                 <Activity className="w-5 h-5 text-orange-500" />
                                 Attention Needed
                             </CardTitle>
-                            <CardDescription className="font-bold text-slate-400 text-[10px] uppercase tracking-wider">SECTIONS REQUIRING REVIEW</CardDescription>
+                            <CardDescription className="font-bold text-slate-400 text-[10px] uppercase tracking-wider">SECTIONS REQUIRING CLARIFICATION</CardDescription>
                         </CardHeader>
                         <CardContent className="pt-4 flex-1 overflow-auto">
                             <div className="space-y-4">
-                                {managerProjects.flatMap(p => p.sections.filter(s => s.status === 'Needs Clarification').map(s => ({ ...s, projectName: p.name, projectId: p.id }))).length > 0 ? (
-                                    managerProjects.flatMap(p => p.sections.filter(s => s.status === 'Needs Clarification').map(s => ({ ...s, projectName: p.name, projectId: p.id }))).map((item, idx) => (
-                                        <div key={idx} className="flex items-start gap-4 p-4 rounded-xl bg-orange-50/50 border border-orange-100 hover:bg-orange-50 transition-colors cursor-pointer" onClick={() => navigate(`/manager/projects/${item.projectId}`)}>
-                                            <div className="mt-1">
-                                                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                                {(() => {
+                                    const attentionItems = managerProjects.flatMap(p =>
+                                        p.sections
+                                            .filter(s => s.status === 'Needs Clarification')
+                                            .map(s => ({ ...s, projectName: p.name, projectId: p.id }))
+                                    );
+
+                                    if (attentionItems.length === 0) {
+                                        return (
+                                            <div className="text-center py-8 text-slate-400 text-xs font-bold uppercase tracking-widest">
+                                                No pending actions needed
                                             </div>
-                                            <div>
-                                                <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{item.title}</p>
-                                                <p className="text-xs text-slate-500 font-bold mt-0.5">PROJECT: {item.projectName.toUpperCase()}</p>
-                                                <p className="text-xs font-black text-orange-600 uppercase tracking-widest mt-2 bg-orange-100/50 w-fit px-2 py-1 rounded">Needs Clarification</p>
+                                        );
+                                    }
+
+                                    return attentionItems.map((item, idx) => {
+                                        const isClarify = item.status === 'Needs Clarification';
+                                        return (
+                                            <div key={idx} className={`flex items-start gap-4 p-4 rounded-xl border transition-colors cursor-pointer ${isClarify ? 'bg-orange-50/50 border-orange-100 hover:bg-orange-50' : 'bg-blue-50/50 border-blue-100 hover:bg-blue-50'
+                                                }`} onClick={() => navigate(`/manager/projects/${item.projectId}`)}>
+                                                <div className="mt-1">
+                                                    <div className={`w-2 h-2 rounded-full animate-pulse ${isClarify ? 'bg-orange-500' : 'bg-blue-500'}`} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{item.title}</p>
+                                                    <p className="text-[10px] text-slate-500 font-bold mt-0.5">PROJECT: {item.projectName.toUpperCase()}</p>
+                                                    <p className={`text-[9px] font-black uppercase tracking-widest mt-2 w-fit px-2 py-1 rounded ${isClarify ? 'bg-orange-100/50 text-orange-600' : 'bg-blue-100/50 text-blue-600'
+                                                        }`}>{item.status}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-8 text-slate-400 text-xs font-bold uppercase tracking-widest">
-                                        No pending clarifications
-                                    </div>
-                                )}
+                                        );
+                                    });
+                                })()}
                             </div>
                         </CardContent>
                     </Card>

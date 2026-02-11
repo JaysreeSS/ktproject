@@ -33,8 +33,8 @@ export default function AdminLayout() {
         { path: '/admin/projects', label: 'Projects', icon: FolderKanban },
     ];
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         navigate('/');
     };
 
@@ -55,13 +55,13 @@ export default function AdminLayout() {
 
                 {/* Logo Area */}
                 <div className={`flex items-center px-6 border-b border-slate-50 transition-all duration-300 ${collapsed ? 'h-20 justify-center' : 'h-24 flex-col justify-center items-start'}`}>
-                    <img
+                    {/* <img
                         src={collapsed ? logoSmall : logo}
                         alt="Logo"
                         className={`transition-all duration-300 object-contain ${collapsed ? 'h-8 w-8' : 'h-8'}`}
-                    />
+                    /> */}
                     <div className={`overflow-hidden transition-all duration-300 ${collapsed ? 'w-0 opacity-0 h-0' : 'w-auto opacity-100 mt-1'}`}>
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap block">
+                        <span className="text-lg font-black text-slate-800 tracking-tighter uppercase whitespace-nowrap block">
                             KT PORTAL
                         </span>
                     </div>
@@ -162,7 +162,7 @@ export default function AdminLayout() {
                     }`}
             >
                 <div className="h-20 flex items-center px-6 border-b border-slate-50">
-                    <img src={logo} alt="Logo" className="h-7" />
+                    {/* <img src={logo} alt="Logo" className="h-7" /> */}
                     <button
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="ml-auto p-2 text-slate-400 hover:text-slate-600 focus:outline-none"
@@ -218,7 +218,7 @@ export default function AdminLayout() {
                                 <span className="h-0.5 w-2/3 bg-current rounded-full" />
                             </div>
                         </button>
-                        <img src={logo} alt="Logo" className="h-6" />
+                        {/* <img src={logo} alt="Logo" className="h-6" /> */}
                     </div>
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-black text-[10px]">
                         {user?.name?.substring(0, 2).toUpperCase()}

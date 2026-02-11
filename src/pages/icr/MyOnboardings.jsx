@@ -43,7 +43,7 @@ export default function MyOnboardings() {
     );
 
     return (
-        <div className="p-5 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700 font-sans">
+        <div className="px-8 md:px-12 py-6 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700 font-sans">
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-10">
                 <div className="space-y-1">
                     <h1 className="text-2xl font-black text-slate-800 tracking-tight uppercase">My Onboardings</h1>
@@ -86,24 +86,14 @@ export default function MyOnboardings() {
                                 <tbody className="divide-y divide-slate-50">
                                     {paginatedProjects.map((p) => {
                                         const myRole = p.members.find(m => m.userId === user.id)?.ktRole;
-
-                                        // Calculate actual completion (Understood sections count)
-                                        const total = p.sections.length;
-                                        const understood = p.sections.filter(s => s.status === 'Understood').length;
-                                        const calcProgress = total > 0 ? Math.round((understood / total) * 100) : 0;
-
-                                        // Derived status logic for display
-                                        let displayStatus = p.status || 'Not Started';
-                                        if (displayStatus !== 'Completed' && calcProgress > 0) {
-                                            displayStatus = 'In Progress';
-                                        }
+                                        const displayProgress = p.completion || 0;
+                                        const displayStatus = p.status || 'Not Started';
 
                                         return (
                                             <tr key={p.id} className="hover:bg-slate-50/50 transition-all cursor-pointer group" onClick={() => navigate(`/icr/onboardings/${p.id}`)}>
                                                 <td className="p-4 py-6">
                                                     <div className="flex flex-col">
-                                                        <span className="text-xs font-bold text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.name}</span>
-                                                        <span className="text-[9px] text-slate-400 font-bold mt-1 max-w-md line-clamp-1 uppercase tracking-wider">{p.description}</span>
+                                                        <span className="text-sm font-bold text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.name}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-4">
@@ -112,7 +102,7 @@ export default function MyOnboardings() {
                                                     </span>
                                                 </td>
                                                 <td className="p-4">
-                                                    <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${displayStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                                    <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${displayStatus === 'Completed' || displayStatus === 'Signed Off' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
                                                         displayStatus === 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                                             'bg-slate-100 text-slate-500 border-slate-200'
                                                         }`}>
@@ -123,11 +113,11 @@ export default function MyOnboardings() {
                                                     <div className="flex items-center gap-4">
                                                         <div className="flex-1 w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                                             <div
-                                                                className={`h-full transition-all duration-1000 ${calcProgress === 100 ? 'bg-emerald-500' : 'bg-orange-500'}`}
-                                                                style={{ width: `${calcProgress}%` }}
+                                                                className={`h-full transition-all duration-1000 ${displayProgress === 100 ? 'bg-emerald-500' : 'bg-orange-500'}`}
+                                                                style={{ width: `${displayProgress}%` }}
                                                             />
                                                         </div>
-                                                        <span className="text-xs font-black text-slate-700 min-w-[35px] text-right">{calcProgress}%</span>
+                                                        <span className="text-xs font-black text-slate-700 min-w-[35px] text-right">{displayProgress}%</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-right">

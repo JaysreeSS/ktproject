@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import logo from '../assets/logo.png';
 
 export default function Landing() {
-    const { login } = useAuth();
+    const { user, login } = useAuth();
     const navigate = useNavigate();
 
     const [username, setUsername] = useState("");
@@ -18,32 +18,41 @@ export default function Landing() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    // Unified navigation logic based on user role
+    useEffect(() => {
+        if (user) {
+            if (user.role === 'admin' || user.isAdmin) {
+                navigate('/admin');
+            } else if (user.role === 'manager') {
+                navigate('/manager');
+            } else {
+                // Default to ICR Dashboard for other roles
+                navigate('/icr/dashboard');
+            }
+        }
+    }, [user, navigate]);
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
 
-        // Aesthetic delay
-        await new Promise(r => setTimeout(r, 600));
-
         try {
-            const user = await login(username); // No role type needed
-            setIsLoading(false);
+            // Initiate login - state updates via AuthContext will trigger navigation
+            const response = await login(username, password);
 
-            if (user) {
-                if (user.role === 'admin' || user.isAdmin) {
-                    navigate('/admin');
-                } else {
-                    navigate('/dashboard');
-                }
-            } else {
-                setError("Invalid credentials. Try 'admin' or 'dev'.");
+            // Only handle errors here. Success case is handled by useEffect.
+            if (!response.success) {
+                setError(response.error || "Invalid credentials.");
+                setIsLoading(false);
             }
+            // If success, keep loading state valid until navigation happens (component unmounts)
         } catch (err) {
             setIsLoading(false);
             setError("An error occurred during login.");
         }
     };
+
 
     return (
         <div className="min-h-screen w-full bg-[#f8f9fc] flex flex-col items-center justify-center relative overflow-hidden font-sans">
@@ -57,11 +66,11 @@ export default function Landing() {
                 {/* Minimal Header */}
                 <header className="text-center mb-8 space-y-3">
                     <div className="flex justify-center mb-4">
-                        <img
+                        {/* <img
                             src={logo}
                             alt="Logo"
                             className="h-10 w-auto opacity-90 grayscale-[0.2]"
-                        />
+                        /> */}
                     </div>
                     <h1 className="text-lg font-black tracking-tight text-slate-800 uppercase">
                         Knowledge Transfer Portal
@@ -110,7 +119,7 @@ export default function Landing() {
                             </div>
 
                             {error && (
-                                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest text-center animate-in fade-in">
+                                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-xs font-semibold text-center animate-in fade-in">
                                     {error}
                                 </div>
                             )}

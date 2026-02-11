@@ -24,7 +24,7 @@ export default function CreateProject() {
         sections: [] // { id, title, contributorId }
     });
 
-    const availableUsers = users.filter(u => !u.isAdmin);
+    const availableUsers = users.filter(u => !u.isAdmin && u.role !== 'admin');
 
     const handleNext = () => setStep(step + 1);
     const handleBack = () => setStep(step - 1);
@@ -74,13 +74,13 @@ export default function CreateProject() {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const projectData = {
             ...formData,
             managerId: user.id,
             managerName: user.name
         };
-        createProject(projectData);
+        await createProject(projectData);
         navigate('/dashboard');
     };
 
@@ -184,16 +184,18 @@ export default function CreateProject() {
                                                 <span className="font-bold text-sm">{m.name}</span>
                                             </div>
                                             <div className="flex bg-white p-1 rounded-lg border border-slate-200">
-                                                {['Initiator', 'Contributor', 'Receiver'].map(role => (
-                                                    <button
-                                                        key={role}
-                                                        onClick={() => updateMemberRole(m.userId, role)}
-                                                        className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${m.ktRole === role ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                                                            }`}
-                                                    >
-                                                        {role}
-                                                    </button>
-                                                ))}
+                                                {['Initiator', 'Contributor', 'Receiver']
+                                                    .filter(role => !(m.functionalRole?.toLowerCase() === 'manager' && role === 'Receiver'))
+                                                    .map(role => (
+                                                        <button
+                                                            key={role}
+                                                            onClick={() => updateMemberRole(m.userId, role)}
+                                                            className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${m.ktRole === role ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                                                                }`}
+                                                        >
+                                                            {role}
+                                                        </button>
+                                                    ))}
                                             </div>
                                         </div>
                                     ))}

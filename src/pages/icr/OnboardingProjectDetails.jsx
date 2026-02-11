@@ -9,7 +9,7 @@ import {
     ChevronLeft,
     CheckCircle2,
     AlertCircle,
-    Activity,
+    FileSearch,
     Layers,
     MessageSquare,
     Paperclip,
@@ -71,7 +71,7 @@ export default function OnboardingProjectDetails() {
     );
 
     return (
-        <div className="p-5 max-w-[1600px] mx-auto space-y-5 animate-in fade-in duration-700 bg-slate-50 min-h-screen font-sans">
+        <div className="px-8 md:px-12 py-6 max-w-[1600px] mx-auto space-y-5 animate-in fade-in duration-700 bg-slate-50 min-h-screen font-sans">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <Button
@@ -119,9 +119,9 @@ export default function OnboardingProjectDetails() {
                                             </h4>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <StatusIcon status={s.status} />
+                                            <StatusIcon status={s.status || 'Draft'} />
                                             <span className={`text-[9px] font-bold uppercase tracking-wider ${isSelected ? 'text-primary/70' : 'text-slate-400'}`}>
-                                                {s.status}
+                                                {s.status || 'Draft'}
                                             </span>
                                         </div>
                                     </div>
@@ -138,25 +138,30 @@ export default function OnboardingProjectDetails() {
                             </CardTitle>
                         </CardHeader>
                         <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto">
-                            {project.members.map((m, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-600 border border-slate-200">
-                                            {m.name.charAt(0)}
+                            {[...project.members]
+                                .sort((a, b) => {
+                                    const roles = { 'Initiator': 1, 'Contributor': 2, 'Receiver': 3 };
+                                    return (roles[a.ktRole] || 4) - (roles[b.ktRole] || 4);
+                                })
+                                .map((m, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-600 border border-slate-200">
+                                                {m.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-800">{m.name}</p>
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{m.functionalRole}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-slate-800">{m.name}</p>
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{m.functionalRole}</p>
-                                        </div>
+                                        <Badge variant="outline" className={`text-[8px] px-1.5 py-0.5 font-black uppercase tracking-wider border ${m.ktRole === 'Initiator' ? 'text-purple-600 bg-purple-50 border-purple-100' :
+                                            m.ktRole === 'Receiver' ? 'text-orange-600 bg-orange-50 border-orange-100' :
+                                                'text-blue-600 bg-blue-50 border-blue-100'
+                                            }`}>
+                                            {m.ktRole}
+                                        </Badge>
                                     </div>
-                                    <Badge variant="outline" className={`text-[8px] px-1.5 py-0.5 font-black uppercase tracking-wider border ${m.ktRole === 'Initiator' ? 'text-purple-600 bg-purple-50 border-purple-100' :
-                                        m.ktRole === 'Receiver' ? 'text-orange-600 bg-orange-50 border-orange-100' :
-                                            'text-blue-600 bg-blue-50 border-blue-100'
-                                        }`}>
-                                        {m.ktRole}
-                                    </Badge>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </Card>
                 </div>
@@ -206,20 +211,24 @@ export default function OnboardingProjectDetails() {
                                         </Button>
                                         <Button
                                             onClick={() => handleStatusUpdate('Needs Clarification')}
-                                            disabled={section.status === 'Needs Clarification' || project.status === 'Completed'}
+                                            disabled={section.status === 'Needs Clarification' || section.status === 'Draft' || project.status === 'Completed'}
                                             className={`rounded-xl h-10 px-4 font-bold uppercase tracking-wider text-[10px] ${section.status === 'Needs Clarification'
                                                 ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                                                : 'bg-white border border-slate-200 text-slate-500 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-100'
+                                                : section.status === 'Draft'
+                                                    ? 'bg-slate-50 border border-slate-100 text-slate-300'
+                                                    : 'bg-white border border-slate-200 text-slate-500 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-100'
                                                 }`}
                                         >
                                             <HelpCircle className="w-4 h-4 mr-2" /> Request Clarification
                                         </Button>
                                         <Button
                                             onClick={() => handleStatusUpdate('Understood')}
-                                            disabled={section.status === 'Understood' || project.status === 'Completed'}
+                                            disabled={section.status === 'Understood' || section.status === 'Draft' || project.status === 'Completed'}
                                             className={`rounded-xl h-10 px-6 font-bold uppercase tracking-wider text-[10px] shadow-lg ${section.status === 'Understood'
                                                 ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200 shadow-emerald-100'
-                                                : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200'
+                                                : section.status === 'Draft'
+                                                    ? 'bg-slate-100 text-slate-400 shadow-none'
+                                                    : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200'
                                                 }`}
                                         >
                                             <ThumbsUp className="w-4 h-4 mr-2" /> Mark as Understood
@@ -351,7 +360,8 @@ function StatusIcon({ status }) {
     switch (status) {
         case 'Understood': return <CheckCircle2 className="w-3 h-3 text-emerald-500" />;
         case 'Needs Clarification': return <AlertCircle className="w-3 h-3 text-orange-500" />;
-        case 'Ready for Review': return <Activity className="w-3 h-3 text-primary" />;
+        case 'Ready for Review': return <FileSearch className="w-3 h-3 text-primary" />;
+        case 'Draft': return <Clock className="w-3 h-3 text-slate-400" />;
         default: return <Clock className="w-3 h-3 text-slate-300" />;
     }
 }

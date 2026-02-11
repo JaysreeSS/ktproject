@@ -3,56 +3,172 @@ import { supabase } from "@/lib/supabase";
 
 const AuthContext = createContext(undefined);
 
-// Mock Users Data
-const MOCK_USERS = [
-    { id: "1", username: "admin", name: "System Admin", role: "admin", isAdmin: true },
-    { id: "2", username: "manager", name: "Project Manager", role: "manager", isAdmin: false },
-    { id: "3", username: "dev", name: "John Developer", role: "developer", isAdmin: false },
-    { id: "4", username: "qa", name: "Sarah QA", role: "qa", isAdmin: false },
-];
-
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(() => {
-        const storedUser = localStorage.getItem("kt_user");
-        return storedUser ? JSON.parse(storedUser) : null;
-    });
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    // useEffect(() => { ... }) removed as it is now redundant
+    useEffect(() => {
+        // Check active sessions and sets the user
+        const getSession = async () => {
+            console.log("[Auth] Checking session...");
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                console.log("[Auth] Session found, fetching profile...");
+                await fetchProfile(session.user.id, session.user.email);
+            } else {
+                console.log("[Auth] No session found.");
+            }
+            setLoading(false);
+        };
 
-    const login = async (username, type) => {
-        // Try to find user in Supabase
-        const { data: dbUsers, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('username', username);
+        getSession();
 
-        let found = null;
-        if (!error && dbUsers && dbUsers.length > 0) {
-            found = dbUsers[0];
-        } else {
-            // Fallback to Mock Data
-            found = MOCK_USERS.find(u => u.username === username);
+        // Listen for changes on auth state
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            console.log(`[Auth] Auth state change: ${_event}`);
+            if (session) {
+                await fetchProfile(session.user.id, session.user.email);
+            } else {
+                setUser(null);
+                localStorage.removeItem("kt_user");
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const fetchProfile = async (userId, email) => {
+        console.log(`[Auth] Fetching profile for ${email} (${userId})`);
+
+        // Helper to add timeout to promises
+        const withTimeout = (promise, ms = 5000) => {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Supabase request timed out")), ms))
+            ]);
+        };
+
+        try {
+            // 1. Try by ID (Preferred)
+            console.log("[Auth] 1. Querying 'users' by ID...");
+            let { data, error } = await withTimeout(
+                supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', userId)
+                    .maybeSingle()
+            );
+
+            if (error) {
+                console.error("[Auth] Error fetching profile by ID:", error);
+            } else {
+                console.log("[Auth] 1. Query by ID result:", data ? "Found" : "Not Found");
+            }
+
+            // 2. Fallback: Try by username (which is the email) if ID lookup fails
+            if (!data && email) {
+                console.log("[Auth] 2. Profile not found by UUID, trying by email/username lookup...", email);
+                const { data: byUsername, error: usernameError } = await withTimeout(
+                    supabase
+                        .from('users')
+                        .select('*')
+                        .or(`username.eq."${email}",email.eq."${email}"`)
+                        .maybeSingle()
+                );
+
+                if (usernameError) {
+                    console.error("[Auth] Username lookup error:", usernameError);
+                }
+
+                if (byUsername) {
+                    data = byUsername;
+                    console.log("[Auth] 2. Found profile by lookup.");
+                } else {
+                    console.log("[Auth] 2. Profile NOT found by lookup either.");
+                }
+            }
+
+            if (data) {
+                console.log("[Auth] Profile found:", data.username);
+                const userWithAdmin = {
+                    ...data,
+                    isAdmin: data.role === 'admin'
+                };
+                setUser(userWithAdmin);
+                localStorage.setItem("kt_user", JSON.stringify(userWithAdmin));
+                return userWithAdmin;
+            }
+
+            console.warn("[Auth] No profile found in database.");
+            return null;
+
+        } catch (err) {
+            console.error("[Auth] Exception during fetchProfile:", err);
+            // If DB fails, we might still want to allow login if we have a session? 
+            // For now, let's just return null and let the UI handle the error.
+            return null;
         }
-
-        if (found) {
-            // Unified login: no role check against 'type' required since we are removing role selection
-            // if (type === "admin" && !found.isAdmin) return false;
-            // if (type === "user" && found.isAdmin) return false;
-
-            setUser(found);
-            localStorage.setItem("kt_user", JSON.stringify(found));
-            return found;
-        }
-        return false;
     };
 
-    const logout = () => {
+    const login = async (username, password) => {
+        console.log("[Auth] Login initiated for:", username);
+
+        try {
+            let emailToUse = username;
+
+            // If the input doesn't look like an email, try to find the email associated with this username
+            if (!username.includes('@')) {
+                console.log("[Auth] Input appears to be a username. Looking up email...");
+                const { data: userRecord, error: lookupError } = await supabase
+                    .from('users')
+                    .select('email')
+                    .eq('username', username)
+                    .maybeSingle();
+
+                if (lookupError) {
+                    console.error("[Auth] Username lookup error:", lookupError);
+                }
+
+                if (userRecord && userRecord.email) {
+                    console.log("[Auth] Email found for username:", userRecord.email);
+                    emailToUse = userRecord.email;
+                } else {
+                    console.warn("[Auth] No email found for username. Attempting login as-is.");
+                }
+            }
+
+            // Simply sign in. The onAuthStateChange listener will handle profile fetching and state updates.
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: emailToUse,
+                password,
+            });
+
+            if (error) {
+                console.error("[Auth] Login error:", error.message);
+                return { success: false, error: error.message };
+            }
+
+            if (data.user) {
+                console.log("[Auth] signInWithPassword success. Waiting for onAuthStateChange to set user...");
+                // We return true here, but the UI should wait for 'user' state to populate via the useEffect hook
+                return { success: true, user: data.user };
+            }
+            return { success: false, error: "Authentication failed (No user returned)." };
+        } catch (err) {
+            console.error("[Auth] Login Exception:", err);
+            return { success: false, error: err.message || "An unexpected error occurred." };
+        }
+    };
+
+    const logout = async () => {
+        console.log("[Auth] Logging out...");
+        await supabase.auth.signOut();
         setUser(null);
         localStorage.removeItem("kt_user");
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, loading }}>
             {children}
         </AuthContext.Provider>
     );

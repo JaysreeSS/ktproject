@@ -46,7 +46,7 @@ export default function AdminProjects({ isEmbedded = false }) {
     };
 
     return (
-        <div className={`p-5 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700 ${isEmbedded ? 'p-10' : ''}`}>
+        <div className={`px-8 md:px-12 py-6 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700 ${isEmbedded ? 'px-0 py-0' : ''}`}>
 
             {!isEmbedded && (
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-10">
@@ -93,17 +93,13 @@ export default function AdminProjects({ isEmbedded = false }) {
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
                                         {paginatedProjects.map((p) => {
-                                            // Calculate actual completion
-                                            const total = p.sections?.length || 0;
-                                            const filled = p.sections?.filter(s => s.status === 'Ready for Review' || s.status === 'Understood').length || 0;
-                                            const calcCompletion = total > 0 ? Math.round((filled / total) * 100) : 0;
+                                            const displayCompletion = p.completion || 0;
 
                                             return (
                                                 <tr key={p.id} className="hover:bg-slate-50/50 transition-all cursor-pointer group" onClick={() => navigate(`/admin/projects/${p.id}`)}>
                                                     <td className="p-4 py-8">
                                                         <div className="flex flex-col">
-                                                            <span className="text-xs font-bold text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.name}</span>
-                                                            <span className="text-[9px] text-slate-400 font-bold mt-1 max-w-md line-clamp-1 uppercase tracking-wider">{p.description}</span>
+                                                            <span className="text-sm font-black text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.name}</span>
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
@@ -122,7 +118,7 @@ export default function AdminProjects({ isEmbedded = false }) {
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
-                                                        <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${p.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                                        <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${p.status === 'Completed' || p.status === 'Signed Off' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
                                                             p.status === 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                                                 'bg-slate-100 text-slate-500 border-slate-200'
                                                             }`}>
@@ -133,11 +129,11 @@ export default function AdminProjects({ isEmbedded = false }) {
                                                         <div className="flex items-center gap-4">
                                                             <div className="flex-1 w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                                                 <div
-                                                                    className={`h-full transition-all duration-1000 ${calcCompletion === 100 ? 'bg-emerald-500' : 'bg-primary'}`}
-                                                                    style={{ width: `${calcCompletion}%` }}
+                                                                    className={`h-full transition-all duration-1000 ${displayCompletion === 100 ? 'bg-emerald-500' : 'bg-primary'}`}
+                                                                    style={{ width: `${displayCompletion}%` }}
                                                                 />
                                                             </div>
-                                                            <span className="text-xs font-black text-slate-700 min-w-[35px] text-right">{calcCompletion}%</span>
+                                                            <span className="text-xs font-black text-slate-700 min-w-[35px] text-right">{displayCompletion}%</span>
                                                         </div>
                                                     </td>
                                                     <td className="p-4 text-right">
