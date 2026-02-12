@@ -6,8 +6,7 @@ import {
     LayoutDashboard,
     Send,
     Inbox,
-    LogOut,
-    Activity
+    LogOut
 } from 'lucide-react';
 import logo from '../assets/logo.png';
 
@@ -28,6 +27,11 @@ export default function ICRLayout() {
         { path: '/icr/onboardings', label: 'My Onboardings', icon: Inbox },
     ];
 
+    const handleLogout = async () => {
+        await logout();
+        navigate('/');
+    };
+
     return (
         <div className="font-sans min-h-screen bg-slate-50">
             {/* Top Navigation Bar */}
@@ -46,7 +50,7 @@ export default function ICRLayout() {
                     </button>
 
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/icr/dashboard')}>
-                        <img src={logo} alt="Logo" className="h-7 md:h-8" />
+                        {/* <img src={logo} alt="Logo" className="h-7 md:h-8" /> */}
                         <span className="font-black text-slate-800 tracking-tight uppercase text-base hidden sm:block">KT Portal</span>
                     </div>
 
@@ -79,7 +83,7 @@ export default function ICRLayout() {
                         <div className="md:hidden w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-black text-[10px]">
                             {user?.name?.substring(0, 2).toUpperCase()}
                         </div>
-                        <Button variant="ghost" size="icon" onClick={logout} className="rounded-xl hover:bg-red-50 hover:text-red-600 hidden md:flex">
+                        <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-xl hover:bg-red-50 hover:text-red-600 hidden md:flex">
                             <LogOut className="w-5 h-5" />
                         </Button>
                     </div>
@@ -100,7 +104,7 @@ export default function ICRLayout() {
                     }`}
             >
                 <div className="h-20 flex items-center px-6 border-b border-slate-50">
-                    <img src={logo} alt="Logo" className="h-7" />
+                    {/* <img src={logo} alt="Logo" className="h-7" /> */}
                     <button
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="ml-auto p-2 text-slate-400 hover:text-slate-600 focus:outline-none"
@@ -137,7 +141,7 @@ export default function ICRLayout() {
                     </div>
                     <Button
                         variant="ghost"
-                        onClick={logout}
+                        onClick={handleLogout}
                         className="w-full justify-start gap-4 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl font-bold text-sm h-12"
                     >
                         <LogOut className="w-5 h-5" />

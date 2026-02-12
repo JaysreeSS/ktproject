@@ -11,7 +11,7 @@ import {
     ChevronLeft,
     CheckCircle2,
     AlertCircle,
-    Activity,
+    FileSearch,
     Layers,
     Users,
     Save,
@@ -65,7 +65,9 @@ export default function ManagerHandoverDetails() {
 
     const handleSave = () => {
         if (section) {
-            updateSectionStatus(projectId, section.id, section.status, content);
+            const hasChanged = content !== (section.content || '');
+            const newStatus = (hasChanged && (section.status === 'Ready for Review' || section.status === 'Needs Clarification')) ? 'Draft' : section.status;
+            updateSectionStatus(projectId, section.id, newStatus, content);
             setIsEditing(false);
         }
     };
@@ -99,7 +101,7 @@ export default function ManagerHandoverDetails() {
     };
 
     return (
-        <div className="p-5 max-w-[1600px] mx-auto space-y-5 animate-in fade-in duration-700 bg-slate-50 min-h-screen font-sans">
+        <div className="px-8 md:px-12 py-6 max-w-[1600px] mx-auto space-y-5 animate-in fade-in duration-700 bg-slate-50 min-h-screen font-sans">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <Button
@@ -152,9 +154,9 @@ export default function ManagerHandoverDetails() {
                                             )}
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <StatusIcon status={s.status} />
+                                            <StatusIcon status={s.status || 'Draft'} />
                                             <span className={`text-[9px] font-bold uppercase tracking-wider ${isSelected ? 'text-primary/70' : 'text-slate-400'}`}>
-                                                {s.status}
+                                                {s.status || 'Draft'}
                                             </span>
                                         </div>
                                     </div>
@@ -171,25 +173,30 @@ export default function ManagerHandoverDetails() {
                             </CardTitle>
                         </CardHeader>
                         <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto">
-                            {project.members.map((m, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-600 border border-slate-200">
-                                            {m.name.charAt(0)}
+                            {[...project.members]
+                                .sort((a, b) => {
+                                    const roles = { 'Initiator': 1, 'Contributor': 2, 'Receiver': 3 };
+                                    return (roles[a.ktRole] || 4) - (roles[b.ktRole] || 4);
+                                })
+                                .map((m, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-600 border border-slate-200">
+                                                {m.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-800">{m.name}</p>
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{m.functionalRole}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-slate-800">{m.name}</p>
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{m.functionalRole}</p>
-                                        </div>
+                                        <Badge variant="outline" className={`text-[8px] px-1.5 py-0.5 font-black uppercase tracking-wider border ${m.ktRole === 'Initiator' ? 'text-purple-600 bg-purple-50 border-purple-100' :
+                                            m.ktRole === 'Receiver' ? 'text-orange-600 bg-orange-50 border-orange-100' :
+                                                'text-blue-600 bg-blue-50 border-blue-100'
+                                            }`}>
+                                            {m.ktRole}
+                                        </Badge>
                                     </div>
-                                    <Badge variant="outline" className={`text-[8px] px-1.5 py-0.5 font-black uppercase tracking-wider border ${m.ktRole === 'Initiator' ? 'text-purple-600 bg-purple-50 border-purple-100' :
-                                        m.ktRole === 'Receiver' ? 'text-orange-600 bg-orange-50 border-orange-100' :
-                                            'text-blue-600 bg-blue-50 border-blue-100'
-                                        }`}>
-                                        {m.ktRole}
-                                    </Badge>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </Card>
                 </div>
@@ -260,7 +267,7 @@ export default function ManagerHandoverDetails() {
                                         {!isReadOnly && isContributor && section.status !== 'Understood' && !isEditing && (
                                             <Button
                                                 onClick={() => handleStatusUpdate('Ready for Review')}
-                                                disabled={!section.content}
+                                                disabled={!section.content || section.status === 'Ready for Review' || section.status === 'Needs Clarification'}
                                                 className="bg-emerald-600 text-white hover:bg-emerald-700 rounded-xl h-10 px-6 font-bold uppercase tracking-wider text-[10px] shadow-lg shadow-emerald-200"
                                             >
                                                 <Send className="w-3 h-3 mr-2" /> Submit
@@ -326,7 +333,11 @@ export default function ManagerHandoverDetails() {
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="w-8 h-8 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500"
-                                                                onClick={() => removeAttachment(projectId, section.id, att.id)}
+                                                                onClick={() => {
+                                                                    if (window.confirm("Remove this attachment?")) {
+                                                                        removeAttachment(projectId, section.id, att.id);
+                                                                    }
+                                                                }}
                                                             >
                                                                 <Trash2 className="w-3 h-3" />
                                                             </Button>
@@ -414,7 +425,8 @@ function StatusIcon({ status }) {
     switch (status) {
         case 'Understood': return <CheckCircle2 className="w-3 h-3 text-emerald-500" />;
         case 'Needs Clarification': return <AlertCircle className="w-3 h-3 text-orange-500" />;
-        case 'Ready for Review': return <Activity className="w-3 h-3 text-primary" />;
+        case 'Ready for Review': return <FileSearch className="w-3 h-3 text-primary" />;
+        case 'Draft': return <Clock className="w-3 h-3 text-slate-400" />;
         default: return <Clock className="w-3 h-3 text-slate-300" />;
     }
 }

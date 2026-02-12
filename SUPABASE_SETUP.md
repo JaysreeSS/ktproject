@@ -9,7 +9,7 @@ Go to [supabase.com](https://supabase.com) and create a new project.
 Run the following SQL in the SQL Editor to create the necessary tables:
 
 ```sql
--- Table for User/Template Sections (Governance Templates)
+-- Table for User/Template Sections
 create table public.templates (
   id uuid default gen_random_uuid() primary key,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,

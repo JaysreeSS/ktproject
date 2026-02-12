@@ -13,9 +13,9 @@ import {
     AlertCircle,
     MessageSquare,
     Lock,
-    Activity,
-    ArrowUpRight,
-    Layers,
+    LayoutDashboard,
+    FolderKanban,
+    ScrollText,
     History,
     Zap,
     Trash2,
@@ -25,8 +25,10 @@ import {
     Plus,
     UserPlus,
     Pencil,
-    X
+    X,
+    FileDown
 } from 'lucide-react';
+import { exportProjectToPDF } from '../lib/pdfExport';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 
 export default function ProjectDetails() {
@@ -41,7 +43,8 @@ export default function ProjectDetails() {
         addSection,
         removeSection,
         updateSectionStatus,
-        updateSection
+        updateSection,
+        updateProject
     } = useProjects();
     const { users: allUsers, templates } = useAdmin();
     const navigate = useNavigate();
@@ -54,6 +57,8 @@ export default function ProjectDetails() {
     const [newMemberId, setNewMemberId] = useState("");
     const [newMemberKtRole, setNewMemberKtRole] = useState("Contributor");
     const [newMemberFunctionalRole, setNewMemberFunctionalRole] = useState("");
+    const [isEditingDeadline, setIsEditingDeadline] = useState(false);
+    const [tempDeadline, setTempDeadline] = useState("");
 
     const project = projects.find(p => p.id === projectId);
 
@@ -68,10 +73,10 @@ export default function ProjectDetails() {
     const isManager = project.managerId === user.id;
     const isAdmin = user.isAdmin;
 
-    // Calculation for overall progress (Only Understood sections)
-    const totalSections = project.sections.length;
-    const understoodSections = project.sections.filter(s => s.status === 'Understood').length;
-    const overallProgress = totalSections > 0 ? Math.round((understoodSections / totalSections) * 100) : 0;
+    // Use persisted progress from database/context
+    const overallProgress = project.completion || 0;
+    const totalSections = project.sections?.length || 0;
+    const understoodSections = project.sections?.filter(s => s.status === 'Understood').length || 0;
 
     const handleCloseProject = () => {
         if (window.confirm("Perform final institutional sign-off? This will archive the project as read-only.")) {
@@ -92,6 +97,8 @@ export default function ProjectDetails() {
         switch (status) {
             case 'Understood':
                 return <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-none border-2">Understood</Badge>;
+            case 'Ready for Review':
+                return <Badge className="bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-none border-2">Ready for Review</Badge>;
             case 'Needs Clarification':
                 return <Badge className="bg-orange-50 text-orange-600 border-orange-100 hover:bg-orange-50 px-3 py-1 text-xs font-bold uppercase tracking-widest shadow-none border-2">Needs Clarification</Badge>;
             default:
@@ -100,7 +107,7 @@ export default function ProjectDetails() {
     };
 
     return (
-        <div className="p-5 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700">
+        <div className="px-8 md:px-12 py-6 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex flex-col gap-1">
                     <Button
@@ -123,12 +130,24 @@ export default function ProjectDetails() {
                             Finish Project
                         </Button>
                     )}
-                    <Badge variant="outline" className={`rounded-xl px-4 py-1.5 font-bold text-xs uppercase tracking-wide border-2 ${project.status === 'Completed' ? 'bg-slate-50 text-slate-500 border-slate-200' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
-                        {project.status === 'Completed' ? 'Signed Off' : 'Active'}
+                    {isAdmin && project.status === 'Completed' && (
+                        <Button
+                            onClick={() => exportProjectToPDF(project)}
+                            className="rounded-xl bg-slate-900 hover:bg-black text-white font-bold uppercase tracking-widest text-xs h-10 px-6 shadow-lg shadow-slate-200"
+                        >
+                            <FileDown className="w-4 h-4 mr-2" /> Export Report
+                        </Button>
+                    )}
+                    <Badge variant="outline" className={`rounded-xl px-4 py-1.5 font-bold text-xs uppercase tracking-wide border-2 ${(project.status === 'Completed' || project.status === 'Signed Off')
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                        : project.status === 'In Progress'
+                            ? 'bg-blue-50 text-blue-600 border-blue-100'
+                            : 'bg-slate-50 text-slate-400 border-slate-200'
+                        }`}>
+                        {project.status === 'Completed' || project.status === 'Signed Off' ? 'Signed Off' : (project.status || 'Active')}
                     </Badge>
                 </div>
             </div>
-
             {/* Top Project Summary Section */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
                 <Card className="xl:col-span-2 shadow-xl border-none ring-1 ring-slate-100 rounded-[2rem] overflow-hidden bg-white h-full flex flex-col">
@@ -137,7 +156,7 @@ export default function ProjectDetails() {
                             <div className="space-y-3">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/10">
-                                        <Layers className="w-6 h-6" />
+                                        <FolderKanban className="w-6 h-6" />
                                     </div>
                                     <div>
                                         <CardTitle className="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-tight uppercase">{project.name}</CardTitle>
@@ -153,13 +172,49 @@ export default function ProjectDetails() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-5 border-y border-slate-100">
                             <MetaDataItem label="Manager" value={project.managerName} />
                             <MetaDataItem label="Created" value={new Date(project.createdAt).toLocaleDateString()} />
-                            <MetaDataItem label="People" value={`${project.members.length} Members`} />
-                            <MetaDataItem label="Tasks" value={`${project.sections.length} Sections`} />
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Deadline</span>
+                                    {isManager && project.status !== 'Completed' && !isEditingDeadline && (
+                                        <button
+                                            onClick={() => {
+                                                setTempDeadline(project.deadline ? project.deadline.split('T')[0] : "");
+                                                setIsEditingDeadline(true);
+                                            }}
+                                            className="p-1 rounded-md text-slate-300 hover:text-primary transition-all"
+                                            title="Edit Deadline"
+                                        >
+                                            <Pencil className="w-3 h-3" />
+                                        </button>
+                                    )}
+                                </div>
+                                {isEditingDeadline && isManager ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="date"
+                                            className="bg-slate-50 border-none rounded-lg h-8 px-2 font-bold text-sm outline-none focus:ring-2 focus:ring-primary/20 w-full"
+                                            value={tempDeadline}
+                                            onChange={(e) => setTempDeadline(e.target.value)}
+                                            onBlur={async () => {
+                                                if (tempDeadline !== project.deadline) {
+                                                    await updateProject(project.id, { deadline: tempDeadline });
+                                                }
+                                                setIsEditingDeadline(false);
+                                            }}
+                                            autoFocus
+                                        />
+                                    </div>
+                                ) : (
+                                    <p className="font-black text-slate-800 text-sm tracking-tight">
+                                        {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'No Deadline'}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
                         <div className="mt-6 space-y-3">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Team Members</h3>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Team Members ({project.members.length})</h3>
                                 {isManager && project.status !== 'Completed' && (
                                     <Button
                                         variant="ghost"
@@ -191,7 +246,11 @@ export default function ProjectDetails() {
                                             </div>
                                             {isManagingTeam && isManager && (
                                                 <button
-                                                    onClick={() => removeMember(project.id, m.userId)}
+                                                    onClick={() => {
+                                                        if (window.confirm(`Remove ${m.name} from this project?`)) {
+                                                            removeMember(project.id, m.id);
+                                                        }
+                                                    }}
                                                     className="ml-2 p-1 text-slate-300 hover:text-red-500 transition-colors"
                                                 >
                                                     <X className="w-3 h-3" />
@@ -221,9 +280,12 @@ export default function ProjectDetails() {
                                                 }}
                                             >
                                                 <option value="">Select User...</option>
-                                                {allUsers.filter(u => !project.members.find(m => m.userId === u.id)).map(u => (
-                                                    <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
-                                                ))}
+                                                {allUsers
+                                                    .filter(u => !u.isAdmin && u.role !== 'admin')
+                                                    .filter(u => !project.members.find(m => m.userId === u.id))
+                                                    .map(u => (
+                                                        <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
+                                                    ))}
                                             </select>
 
                                             <select
@@ -231,9 +293,12 @@ export default function ProjectDetails() {
                                                 value={newMemberKtRole}
                                                 onChange={(e) => setNewMemberKtRole(e.target.value)}
                                             >
-                                                <option value="Contributor">Contributor</option>
-                                                <option value="Initiator">Initiator</option>
-                                                <option value="Receiver">Receiver</option>
+                                                {['Contributor', 'Initiator', 'Receiver']
+                                                    .filter(role => !(newMemberFunctionalRole?.toLowerCase() === 'manager' && role === 'Receiver'))
+                                                    .map(role => (
+                                                        <option key={role} value={role}>{role}</option>
+                                                    ))
+                                                }
                                             </select>
 
 
@@ -284,7 +349,6 @@ export default function ProjectDetails() {
                             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">Overall Progress</CardTitle>
                             <ShieldCheck className="w-6 h-6 text-primary" />
                         </div>
-                        <CardDescription className="text-slate-500 text-[9px] font-bold mt-1 uppercase tracking-wider">Confirmed by Receiver</CardDescription>
                     </CardHeader>
                     <CardContent className="p-5 flex flex-col items-center justify-center space-y-6 relative z-10 flex-1">
                         <div className="relative w-40 h-40 flex items-center justify-center">
@@ -315,7 +379,7 @@ export default function ProjectDetails() {
                                     <p className="text-xs font-black uppercase tracking-widest text-slate-500">Checked Sections</p>
                                     <p className="text-base font-bold text-slate-900">{understoodSections} of {totalSections} done</p>
                                 </div>
-                                <Activity className="w-4 h-4 text-primary animate-pulse" />
+                                <Zap className="w-4 h-4 text-primary" />
                             </div>
                             <div className="h-2 bg-white rounded-full overflow-hidden">
                                 <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${overallProgress}%` }} />
@@ -330,18 +394,17 @@ export default function ProjectDetails() {
                 <CardHeader className="p-5 pb-4 flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div>
                         <CardTitle className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-                            <Activity className="w-6 h-6 text-primary" />
-                            Project Sections
+                            <ScrollText className="w-6 h-6 text-primary" />
+                            Project Sections ({project.sections.length})
                         </CardTitle>
-                        <CardDescription className="text-slate-500 font-bold mt-1 uppercase text-xs tracking-wide">Track what's been done and what's left</CardDescription>
                     </div>
                     {isManager && project.status !== 'Completed' && (
                         <Button
                             onClick={() => setIsAddingSection(!isAddingSection)}
-                            className="w-full sm:w-auto rounded-xl bg-slate-900 border-none h-10 px-6 font-bold uppercase tracking-wide text-sm shadow-lg shadow-slate-200"
+                            className="w-full sm:w-auto rounded-xl bg-primary border-none h-8 px-4 font-bold uppercase tracking-wide text-xs shadow-lg shadow-primary/20"
                         >
-                            {isAddingSection ? <X className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                            {isAddingSection ? 'Cancel' : 'Add New Section'}
+                            {isAddingSection ? <X className="w-3.5 h-3.5 mr-2" /> : <Plus className="w-3.5 h-3.5 mr-2" />}
+                            {isAddingSection ? 'Cancel' : 'Add Section'}
                         </Button>
                     )}
                 </CardHeader>
@@ -350,7 +413,7 @@ export default function ProjectDetails() {
                         <div className="p-10 bg-slate-50 border-y border-slate-100 animate-in slide-in-from-top-4 duration-500">
                             <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Select a Template to Insert</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {templates.filter(t => !project.sections.find(s => s.id === t.id)).map(t => (
+                                {templates.filter(t => !project.sections.find(s => s.title === t.title)).map(t => (
                                     <div
                                         key={t.id}
                                         className="p-6 bg-white rounded-[2rem] border-2 border-slate-100 hover:border-primary hover:shadow-xl transition-all group flex flex-col justify-between"
@@ -362,7 +425,6 @@ export default function ProjectDetails() {
                                                 </div>
                                                 <h4 className="font-black text-slate-800 uppercase text-sm tracking-tight">{t.title}</h4>
                                             </div>
-                                            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{t.description || 'Standard knowledge protocol section.'}</p>
                                         </div>
 
                                         <div className="mt-6 pt-4 border-t border-slate-100 space-y-3">
@@ -402,7 +464,7 @@ export default function ProjectDetails() {
                                         </div>
                                     </div>
                                 ))}
-                                {templates.filter(t => !project.sections.find(s => s.id === t.id)).length === 0 && (
+                                {templates.filter(t => !project.sections.find(s => s.title === t.title)).length === 0 && (
                                     <div className="col-span-full py-10 text-center text-slate-400 font-bold uppercase text-xs tracking-widest">
                                         All templates are already in this protocol
                                     </div>
@@ -440,7 +502,7 @@ export default function ProjectDetails() {
                                                         if (isSectionContributor) targetPath = `/icr/handovers/${projectId}`;
                                                         navigate(targetPath);
                                                     }}>{section.title}</span>
-                                                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Step {idx + 1}</span>
+                                                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Sequence {idx + 1}</span>
                                                 </div>
                                             </td>
                                             <td className="p-4">
@@ -480,10 +542,11 @@ export default function ProjectDetails() {
                                                                 {contributor?.ktRole || contributor?.functionalRole || 'Member'}
                                                             </Badge>
                                                         </div>
-                                                        {isManager && project.status !== 'Completed' && (
+                                                        {isManager && project.status !== 'Completed' && progress === 0 && (
                                                             <button
-                                                                className="ml-2 p-2 rounded-lg hover:bg-white text-slate-300 hover:text-primary transition-all shadow-sm opacity-0 group-hover:opacity-100"
+                                                                className="ml-2 p-2 rounded-lg hover:bg-white text-slate-300 hover:text-primary transition-all shadow-sm"
                                                                 onClick={() => setEditingSectionId(section.id)}
+                                                                title="Change Assignee"
                                                             >
                                                                 <Pencil className="w-3.5 h-3.5" />
                                                             </button>
@@ -514,18 +577,21 @@ export default function ProjectDetails() {
                                             </td>
                                             {isManager && (
                                                 <td className="p-4 text-right">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="w-10 h-10 rounded-xl hover:bg-red-50 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"
-                                                        onClick={() => {
-                                                            if (window.confirm("Remove this section from the protocol? This action cannot be undone.")) {
-                                                                removeSection(project.id, section.id);
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
+                                                    {progress === 0 && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="w-10 h-10 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all"
+                                                            onClick={() => {
+                                                                if (window.confirm("Remove this section from the protocol? This action cannot be undone.")) {
+                                                                    removeSection(project.id, section.id);
+                                                                }
+                                                            }}
+                                                            title="Delete Section"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    )}
                                                 </td>
                                             )}
                                         </tr>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { Folder, LogOut, Activity, Send, ChevronLeft } from 'lucide-react';
+import { Folder, LogOut, LayoutDashboard, Send, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
@@ -24,6 +24,11 @@ export default function ManagerLayout() {
         return false;
     };
 
+    const handleLogout = async () => {
+        await logout();
+        navigate('/');
+    };
+
     return (
         <div className="flex flex-col min-h-screen bg-slate-50 font-sans">
             <ScrollToTop />
@@ -43,13 +48,13 @@ export default function ManagerLayout() {
                     </button>
 
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/manager')}>
-                        <img src={logo} alt="Logo" className="h-7 md:h-8" />
+                        {/* <img src={logo} alt="Logo" className="h-7 md:h-8" /> */}
                         <span className="font-black text-slate-800 tracking-tight uppercase text-base hidden sm:block">KT Portal</span>
                     </div>
 
                     <nav className="hidden md:flex items-center gap-1">
                         <TopNavItem
-                            icon={<Activity className="w-4 h-4" />}
+                            icon={<LayoutDashboard className="w-4 h-4" />}
                             label="Dashboard"
                             active={isActive('/manager') && location.pathname === '/manager'}
                             onClick={() => navigate('/manager')}
@@ -78,7 +83,7 @@ export default function ManagerLayout() {
                         <div className="md:hidden w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-black text-[10px]">
                             {user?.name?.substring(0, 2).toUpperCase()}
                         </div>
-                        <Button variant="ghost" size="icon" onClick={logout} className="rounded-xl hover:bg-red-50 hover:text-red-600 hidden md:flex">
+                        <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-xl hover:bg-red-50 hover:text-red-600 hidden md:flex">
                             <LogOut className="w-5 h-5" />
                         </Button>
                     </div>
@@ -99,7 +104,7 @@ export default function ManagerLayout() {
                     }`}
             >
                 <div className="h-20 flex items-center px-6 border-b border-slate-50">
-                    <img src={logo} alt="Logo" className="h-7" />
+                    {/* <img src={logo} alt="Logo" className="h-7" /> */}
                     <button
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="ml-auto p-2 text-slate-400 hover:text-slate-600 focus:outline-none"
@@ -110,7 +115,7 @@ export default function ManagerLayout() {
 
                 <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
                     <MobileNavItem
-                        icon={<Activity className="w-5 h-5" />}
+                        icon={<LayoutDashboard className="w-5 h-5" />}
                         label="Dashboard"
                         active={isActive('/manager') && location.pathname === '/manager'}
                         onClick={() => navigate('/manager')}
@@ -141,7 +146,7 @@ export default function ManagerLayout() {
                     </div>
                     <Button
                         variant="ghost"
-                        onClick={logout}
+                        onClick={handleLogout}
                         className="w-full justify-start gap-4 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl font-bold text-sm h-12"
                     >
                         <LogOut className="w-5 h-5" />

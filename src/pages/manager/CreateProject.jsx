@@ -20,11 +20,12 @@ export default function CreateProject() {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
+        deadline: '',
         members: [], // { userId, ktRole, functionalRole }
         sections: [] // { id, title, contributorId }
     });
 
-    const availableUsers = users.filter(u => !u.isAdmin);
+    const availableUsers = users.filter(u => !u.isAdmin && u.role !== 'admin');
 
     const handleNext = () => setStep(step + 1);
     const handleBack = () => setStep(step - 1);
@@ -74,13 +75,13 @@ export default function CreateProject() {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const projectData = {
             ...formData,
             managerId: user.id,
             managerName: user.name
         };
-        createProject(projectData);
+        await createProject(projectData);
         navigate('/dashboard');
     };
 
@@ -89,10 +90,10 @@ export default function CreateProject() {
             <div className="flex items-center justify-between">
                 <Button
                     variant="ghost"
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => navigate('/manager/projects')}
                     className="w-fit rounded-xl text-primary hover:text-primary hover:bg-primary/10 font-bold uppercase tracking-widest text-[10px] pl-0 hover:pl-2 transition-all"
                 >
-                    <ChevronLeft className="w-4 h-4 mr-1" /> Back to Dashboard
+                    <ChevronLeft className="w-4 h-4 mr-1" /> Back to Projects
                 </Button>
                 <div className="flex gap-2">
                     {[1, 2, 3].map(i => (
@@ -129,6 +130,16 @@ export default function CreateProject() {
                                 className="min-h-[100px] resize-none text-sm font-bold border-slate-200"
                                 value={formData.description}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="deadline" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Deadline (Optional)</Label>
+                            <Input
+                                id="deadline"
+                                type="date"
+                                className="h-10 text-sm font-bold border-slate-200"
+                                value={formData.deadline}
+                                onChange={e => setFormData({ ...formData, deadline: e.target.value })}
                             />
                         </div>
                     </CardContent>
@@ -184,16 +195,18 @@ export default function CreateProject() {
                                                 <span className="font-bold text-sm">{m.name}</span>
                                             </div>
                                             <div className="flex bg-white p-1 rounded-lg border border-slate-200">
-                                                {['Initiator', 'Contributor', 'Receiver'].map(role => (
-                                                    <button
-                                                        key={role}
-                                                        onClick={() => updateMemberRole(m.userId, role)}
-                                                        className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${m.ktRole === role ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                                                            }`}
-                                                    >
-                                                        {role}
-                                                    </button>
-                                                ))}
+                                                {['Initiator', 'Contributor', 'Receiver']
+                                                    .filter(role => !(m.functionalRole?.toLowerCase() === 'manager' && role === 'Receiver'))
+                                                    .map(role => (
+                                                        <button
+                                                            key={role}
+                                                            onClick={() => updateMemberRole(m.userId, role)}
+                                                            className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${m.ktRole === role ? 'bg-orange-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                                                                }`}
+                                                        >
+                                                            {role}
+                                                        </button>
+                                                    ))}
                                             </div>
                                         </div>
                                     ))}

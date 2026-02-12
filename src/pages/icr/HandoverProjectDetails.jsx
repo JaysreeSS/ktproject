@@ -11,7 +11,7 @@ import {
     ChevronLeft,
     CheckCircle2,
     AlertCircle,
-    Activity,
+    FileSearch,
     Layers,
     Users,
     Save,
@@ -65,7 +65,9 @@ export default function HandoverProjectDetails() {
 
     const handleSave = () => {
         if (section) {
-            updateSectionStatus(projectId, section.id, section.status, content);
+            const hasChanged = content !== (section.content || '');
+            const newStatus = (hasChanged && (section.status === 'Ready for Review' || section.status === 'Needs Clarification')) ? 'Draft' : section.status;
+            updateSectionStatus(projectId, section.id, newStatus, content);
             setIsEditing(false);
         }
     };
@@ -99,7 +101,7 @@ export default function HandoverProjectDetails() {
     };
 
     return (
-        <div className="p-5 max-w-[1600px] mx-auto space-y-5 animate-in fade-in duration-700 bg-slate-50 min-h-screen font-sans">
+        <div className="px-8 md:px-12 py-6 max-w-[1600px] mx-auto space-y-5 animate-in fade-in duration-700 bg-slate-50 min-h-screen font-sans">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <Button
@@ -111,8 +113,13 @@ export default function HandoverProjectDetails() {
                 </Button>
                 <div className="flex items-center gap-4">
                     <p className="text-sm font-bold text-slate-800 tracking-tight uppercase">{project.name}</p>
-                    <Badge variant="outline" className={`rounded-xl px-4 py-1.5 font-bold text-xs uppercase tracking-wide border-2 ${project.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
-                        {project.status || 'Active'}
+                    <Badge variant="outline" className={`rounded-xl px-4 py-1.5 font-bold text-xs uppercase tracking-wide border-2 ${(project.status === 'Completed' || project.status === 'Signed Off')
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                        : project.status === 'In Progress'
+                            ? 'bg-blue-50 text-blue-600 border-blue-100'
+                            : 'bg-slate-50 text-slate-400 border-slate-200'
+                        }`}>
+                        {project.status === 'Completed' || project.status === 'Signed Off' ? 'Signed Off' : (project.status || 'Active')}
                     </Badge>
                 </div>
             </div>
@@ -123,8 +130,11 @@ export default function HandoverProjectDetails() {
                     {/* Sections List */}
                     <Card className="shadow-lg border-none ring-1 ring-slate-100 rounded-xl bg-white overflow-hidden flex flex-col">
                         <CardHeader className="p-4 pb-3 bg-slate-50/50 border-b border-slate-100 sticky top-0 z-10 backdrop-blur-sm">
-                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                                <Layers className="w-4 h-4" /> Project Sections
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                    <Layers className="w-4 h-4" /> Project Sections
+                                </div>
+                                <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[10px] bg-slate-100 text-slate-600 border-none">{project.sections.length}</Badge>
                             </CardTitle>
                         </CardHeader>
                         <div className="p-3 space-y-2 flex-1 overflow-y-auto">
@@ -152,9 +162,9 @@ export default function HandoverProjectDetails() {
                                             )}
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <StatusIcon status={s.status} />
+                                            <StatusIcon status={s.status || 'Draft'} />
                                             <span className={`text-[9px] font-bold uppercase tracking-wider ${isSelected ? 'text-primary/70' : 'text-slate-400'}`}>
-                                                {s.status}
+                                                {s.status || 'Draft'}
                                             </span>
                                         </div>
                                     </div>
@@ -166,30 +176,38 @@ export default function HandoverProjectDetails() {
                     {/* Team Members */}
                     <Card className="shadow-lg border-none ring-1 ring-slate-100 rounded-xl bg-white overflow-hidden flex-shrink-0">
                         <CardHeader className="p-4 pb-3 bg-slate-50/50 border-b border-slate-100">
-                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                                <Users className="w-4 h-4" /> Team
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                    <Users className="w-4 h-4" /> Team
+                                </div>
+                                <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[10px] bg-slate-100 text-slate-600 border-none">{project.members.length}</Badge>
                             </CardTitle>
                         </CardHeader>
                         <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto">
-                            {project.members.map((m, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-600 border border-slate-200">
-                                            {m.name.charAt(0)}
+                            {[...project.members]
+                                .sort((a, b) => {
+                                    const roles = { 'Initiator': 1, 'Contributor': 2, 'Receiver': 3 };
+                                    return (roles[a.ktRole] || 4) - (roles[b.ktRole] || 4);
+                                })
+                                .map((m, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-600 border border-slate-200">
+                                                {m.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-800">{m.name}</p>
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{m.functionalRole}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-slate-800">{m.name}</p>
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{m.functionalRole}</p>
-                                        </div>
+                                        <Badge variant="outline" className={`text-[8px] px-1.5 py-0.5 font-black uppercase tracking-wider border ${m.ktRole === 'Initiator' ? 'text-purple-600 bg-purple-50 border-purple-100' :
+                                            m.ktRole === 'Receiver' ? 'text-orange-600 bg-orange-50 border-orange-100' :
+                                                'text-blue-600 bg-blue-50 border-blue-100'
+                                            }`}>
+                                            {m.ktRole}
+                                        </Badge>
                                     </div>
-                                    <Badge variant="outline" className={`text-[8px] px-1.5 py-0.5 font-black uppercase tracking-wider border ${m.ktRole === 'Initiator' ? 'text-purple-600 bg-purple-50 border-purple-100' :
-                                        m.ktRole === 'Receiver' ? 'text-orange-600 bg-orange-50 border-orange-100' :
-                                            'text-blue-600 bg-blue-50 border-blue-100'
-                                        }`}>
-                                        {m.ktRole}
-                                    </Badge>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </Card>
                 </div>
@@ -260,7 +278,7 @@ export default function HandoverProjectDetails() {
                                         {!isReadOnly && isContributor && section.status !== 'Understood' && !isEditing && (
                                             <Button
                                                 onClick={() => handleStatusUpdate('Ready for Review')}
-                                                disabled={!section.content}
+                                                disabled={!section.content || section.status === 'Ready for Review' || section.status === 'Needs Clarification'}
                                                 className="bg-emerald-600 text-white hover:bg-emerald-700 rounded-xl h-10 px-6 font-bold uppercase tracking-wider text-[10px] shadow-lg shadow-emerald-200"
                                             >
                                                 <Send className="w-3 h-3 mr-2" /> Submit
@@ -326,7 +344,11 @@ export default function HandoverProjectDetails() {
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="w-8 h-8 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500"
-                                                                onClick={() => removeAttachment(projectId, section.id, att.id)}
+                                                                onClick={() => {
+                                                                    if (window.confirm("Remove this attachment?")) {
+                                                                        removeAttachment(projectId, section.id, att.id);
+                                                                    }
+                                                                }}
                                                             >
                                                                 <Trash2 className="w-3 h-3" />
                                                             </Button>
@@ -414,7 +436,8 @@ function StatusIcon({ status }) {
     switch (status) {
         case 'Understood': return <CheckCircle2 className="w-3 h-3 text-emerald-500" />;
         case 'Needs Clarification': return <AlertCircle className="w-3 h-3 text-orange-500" />;
-        case 'Ready for Review': return <Activity className="w-3 h-3 text-primary" />;
+        case 'Ready for Review': return <FileSearch className="w-3 h-3 text-primary" />;
+        case 'Draft': return <Clock className="w-3 h-3 text-slate-400" />;
         default: return <Clock className="w-3 h-3 text-slate-300" />;
     }
 }

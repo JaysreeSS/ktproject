@@ -4,7 +4,8 @@ import { useProjects } from '../../contexts/ProjectContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-    Activity,
+    Briefcase,
+    FileCheck,
     Layers,
     ArrowUpRight,
     Send,
@@ -37,6 +38,27 @@ export default function ICRDashboard() {
         }
     };
 
+    // 4. Enhanced Attention Needed Logic:
+    // - As a Contributor: See 'Needs Clarification' tasks
+    // - As a Receiver: See 'Ready for Review' tasks
+    const attentionNeeded = projects.flatMap(p => {
+        const myRole = p.members.find(m => m.userId === user.id)?.ktRole;
+        const myTasks = [];
+
+        (p.sections || []).forEach(s => {
+            // Case 1: I am the contributor and the receiver has questions
+            if (s.contributorId === user.id && s.status === 'Needs Clarification') {
+                myTasks.push({ ...s, projectId: p.id, projectName: p.name, type: 'clarify' });
+            }
+            // Case 2: I am the receiver and a task is waiting for my sign-off
+            if (myRole === 'Receiver' && s.status === 'Ready for Review') {
+                myTasks.push({ ...s, projectId: p.id, projectName: p.name, type: 'review' });
+            }
+        });
+
+        return myTasks;
+    });
+
     const stats = [
         {
             title: "Active Handovers",
@@ -61,14 +83,14 @@ export default function ICRDashboard() {
         {
             title: "Total Engagements",
             value: myProjects.length,
-            icon: Activity,
+            icon: Briefcase,
             color: "text-emerald-600",
             bg: "bg-emerald-50/80"
         }
     ];
 
     return (
-        <div className="p-5 space-y-5 max-w-7xl mx-auto animate-in fade-in duration-700">
+        <div className="px-8 md:px-12 py-6 space-y-5 max-w-7xl mx-auto animate-in fade-in duration-700">
             <header className="space-y-1">
                 <h1 className="text-2xl font-black text-slate-800 tracking-tight uppercase">Dashboard</h1>
                 <p className="text-slate-500 font-bold text-sm leading-relaxed max-w-lg">Overview of your knowledge transfer responsibilities and learning paths.</p>
@@ -90,6 +112,52 @@ export default function ICRDashboard() {
                         </CardContent>
                     </Card>
                 ))}
+            </div>
+
+            {/* Attention Needed Sections Area */}
+            <div className="space-y-4">
+                <h2 className="text-base font-black text-slate-800 tracking-tight uppercase flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-orange-500" />
+                    Attention Needed
+                </h2>
+                {attentionNeeded.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {attentionNeeded.map((section, idx) => {
+                            const isClarify = section.type === 'clarify';
+                            const targetPath = isClarify ? `/icr/handovers/${section.projectId}` : `/icr/onboardings/${section.projectId}`;
+
+                            return (
+                                <Card
+                                    key={`${section.projectId}-${section.id}-${idx}`}
+                                    onClick={() => navigate(targetPath)}
+                                    className={`group cursor-pointer border-2 transition-all rounded-xl overflow-hidden ${isClarify ? 'border-orange-100 bg-orange-50/30 hover:bg-orange-50' : 'border-blue-100 bg-blue-50/30 hover:bg-blue-50'
+                                        }`}
+                                >
+                                    <CardContent className="p-4 flex items-center gap-4">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isClarify ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'
+                                            }`}>
+                                            {isClarify ? <Inbox className="w-5 h-5" /> : <FileCheck className="w-5 h-5" />}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{section.projectName}</h4>
+                                            <p className="text-sm font-bold text-slate-800 truncate">{section.title}</p>
+                                            <p className={`text-[10px] font-black uppercase mt-1 ${isClarify ? 'text-orange-600' : 'text-blue-600'
+                                                }`}>
+                                                {isClarify ? 'Clarification Needed' : 'Review Required'}
+                                            </p>
+                                        </div>
+                                        <ArrowUpRight className={`w-4 h-4 ml-auto group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all ${isClarify ? 'text-orange-300 group-hover:text-orange-600' : 'text-blue-300 group-hover:text-blue-600'
+                                            }`} />
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-slate-400 text-[10px] font-black uppercase tracking-widest bg-white border border-dashed border-slate-100 rounded-xl">
+                        No pending actions required at this time
+                    </div>
+                )}
             </div>
 
             {/* Projects Grid */}
@@ -155,7 +223,7 @@ export default function ICRDashboard() {
                                                 )}
                                             </div>
                                             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-auto">
-                                                {project.sections.length} Modules
+                                                {project.sections.length} Sections
                                             </span>
                                         </div>
                                     </CardContent>

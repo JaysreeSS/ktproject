@@ -22,9 +22,10 @@ export default function MyHandovers() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
-    // Filter projects where user is Initiator or Contributor
+    // Filter projects where user is Initiator, Contributor, or assigned to a section
     const myProjects = projects.filter(p =>
-        p.members.some(m => m.userId === user.id && (m.ktRole === 'Initiator' || m.ktRole === 'Contributor'))
+        p.members.some(m => m.userId === user.id && (m.ktRole === 'Initiator' || m.ktRole === 'Contributor')) ||
+        p.sections.some(s => s.contributorId === user.id)
     );
 
     const filteredProjects = myProjects.filter(p =>
@@ -45,7 +46,7 @@ export default function MyHandovers() {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
-            <main className="p-5 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700">
+            <main className="px-8 md:px-12 py-6 max-w-7xl mx-auto space-y-5 animate-in fade-in duration-700">
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-10">
                     <div className="space-y-1">
                         <h1 className="text-2xl font-black text-slate-800 tracking-tight uppercase">My Handovers</h1>
@@ -89,22 +90,14 @@ export default function MyHandovers() {
                                         <tbody className="divide-y divide-slate-50">
                                             {paginatedProjects.map((p) => {
                                                 const myRole = p.members.find(m => m.userId === user.id)?.ktRole;
-                                                const total = p.sections.length;
-                                                const filled = p.sections.filter(s => s.status === 'Ready for Review' || s.status === 'Understood').length;
-                                                const calcCompletion = total > 0 ? Math.round((filled / total) * 100) : 0;
-
-                                                // Derived status logic for display
-                                                let displayStatus = p.status || 'Not Started';
-                                                if (displayStatus !== 'Completed' && calcCompletion > 0) {
-                                                    displayStatus = 'In Progress';
-                                                }
+                                                const completion = p.completion || 0;
+                                                const status = p.status || 'Not Started';
 
                                                 return (
                                                     <tr key={p.id} className="hover:bg-slate-50/50 transition-all cursor-pointer group" onClick={() => navigate(`/manager/my-handovers/${p.id}`)}>
                                                         <td className="p-4 py-6">
                                                             <div className="flex flex-col">
-                                                                <span className="text-xs font-bold text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.name}</span>
-                                                                <span className="text-[9px] text-slate-400 font-bold mt-1 max-w-md line-clamp-1 uppercase tracking-wider">{p.description}</span>
+                                                                <span className="text-sm font-bold text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.name}</span>
                                                             </div>
                                                         </td>
                                                         <td className="p-4">
@@ -113,22 +106,22 @@ export default function MyHandovers() {
                                                             </span>
                                                         </td>
                                                         <td className="p-4">
-                                                            <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${displayStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                                                displayStatus === 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                                            <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${status === 'Completed' || status === 'Signed Off' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                                                status === 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                                                     'bg-slate-100 text-slate-500 border-slate-200'
                                                                 }`}>
-                                                                {displayStatus}
+                                                                {status}
                                                             </div>
                                                         </td>
                                                         <td className="p-4">
                                                             <div className="flex items-center gap-4">
                                                                 <div className="flex-1 w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                                                     <div
-                                                                        className={`h-full transition-all duration-1000 ${calcCompletion === 100 ? 'bg-emerald-500' : 'bg-primary'}`}
-                                                                        style={{ width: `${calcCompletion}%` }}
+                                                                        className={`h-full transition-all duration-1000 ${completion === 100 ? 'bg-emerald-500' : 'bg-primary'}`}
+                                                                        style={{ width: `${completion}%` }}
                                                                     />
                                                                 </div>
-                                                                <span className="text-xs font-black text-slate-700 min-w-[35px] text-right">{calcCompletion}%</span>
+                                                                <span className="text-xs font-black text-slate-700 min-w-[35px] text-right">{completion}%</span>
                                                             </div>
                                                         </td>
                                                         <td className="p-4 text-right">

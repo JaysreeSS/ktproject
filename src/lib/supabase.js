@@ -8,8 +8,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.error("Missing Supabase environment variables. Please check your .env file.");
 }
 
+console.log("[Supabase] Initializing client...", supabaseUrl ? "URL present" : "URL MISSING");
+
 export const supabase = (supabaseUrl && supabaseAnonKey)
-    ? createClient(supabaseUrl, supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+        }
+    })
     : {
         from: () => ({
             select: () => Promise.resolve({ data: [], error: { message: "Supabase not configured" } }),
