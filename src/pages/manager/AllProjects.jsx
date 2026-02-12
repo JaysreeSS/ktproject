@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useProjects } from '../../contexts/ProjectContext.jsx';
 import { Button } from '@/components/ui/button';
-import { Plus, Folder, LogOut, ChevronLeft, ChevronRight, Activity, Search, Eye, ShieldAlert, Send } from 'lucide-react';
+import { Plus, Folder, LogOut, ChevronLeft, ChevronRight, Search, Eye, ShieldAlert, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -78,6 +78,7 @@ export default function AllProjects() {
                                         <tr>
                                             <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Project Name</th>
                                             <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
+                                            <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Deadline</th>
                                             <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Completion</th>
                                             <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right"></th>
                                         </tr>
@@ -95,12 +96,19 @@ export default function AllProjects() {
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
-                                                        <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${displayStatus === 'Completed' || displayStatus === 'Signed Off' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                                            displayStatus === 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                                                'bg-slate-100 text-slate-500 border-slate-200'
+                                                        <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${(displayStatus === 'Completed' || displayStatus === 'Signed Off')
+                                                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                            : displayStatus === 'In Progress'
+                                                                ? 'bg-blue-50 text-blue-600 border-blue-100'
+                                                                : 'bg-slate-50 text-slate-400 border-slate-200'
                                                             }`}>
-                                                            {displayStatus}
+                                                            {displayStatus === 'Completed' || displayStatus === 'Signed Off' ? 'Signed Off' : (displayStatus || 'Active')}
                                                         </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">
+                                                            {p.deadline ? new Date(p.deadline).toLocaleDateString() : 'N/A'}
+                                                        </span>
                                                     </td>
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-4">

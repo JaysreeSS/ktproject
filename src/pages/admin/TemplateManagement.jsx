@@ -32,7 +32,6 @@ export default function TemplateManagement({ isEmbedded = false }) {
             await addTemplate({
                 title: newTitle.trim(),
                 description: newDescription,
-                attachment_url: '',
                 input_type: ['text', 'file']
             });
         }
@@ -160,16 +159,6 @@ export default function TemplateManagement({ isEmbedded = false }) {
                                             <p className="text-xs text-slate-500 font-bold max-w-md">{t.description}</p>
                                         )}
 
-                                        {t.attachment_url && (
-                                            <a
-                                                href={t.attachment_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center text-xs font-black text-blue-600 hover:underline mt-1 uppercase tracking-widest"
-                                            >
-                                                <Paperclip className="w-3 h-3 mr-1" /> View Attachment
-                                            </a>
-                                        )}
 
                                         <div className="flex items-center gap-3 mt-2">
                                             <span className="text-xs font-black uppercase tracking-widest text-slate-400">Sequence: {t.order || idx + 1}</span>

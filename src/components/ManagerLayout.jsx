@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { Folder, LogOut, Activity, Send, ChevronLeft } from 'lucide-react';
+import { Folder, LogOut, LayoutDashboard, Send, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
@@ -54,7 +54,7 @@ export default function ManagerLayout() {
 
                     <nav className="hidden md:flex items-center gap-1">
                         <TopNavItem
-                            icon={<Activity className="w-4 h-4" />}
+                            icon={<LayoutDashboard className="w-4 h-4" />}
                             label="Dashboard"
                             active={isActive('/manager') && location.pathname === '/manager'}
                             onClick={() => navigate('/manager')}
@@ -115,7 +115,7 @@ export default function ManagerLayout() {
 
                 <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
                     <MobileNavItem
-                        icon={<Activity className="w-5 h-5" />}
+                        icon={<LayoutDashboard className="w-5 h-5" />}
                         label="Dashboard"
                         active={isActive('/manager') && location.pathname === '/manager'}
                         onClick={() => navigate('/manager')}

@@ -4,7 +4,8 @@ import { useProjects } from '../../contexts/ProjectContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-    Activity,
+    Briefcase,
+    FileCheck,
     Layers,
     ArrowUpRight,
     Send,
@@ -82,7 +83,7 @@ export default function ICRDashboard() {
         {
             title: "Total Engagements",
             value: myProjects.length,
-            icon: Activity,
+            icon: Briefcase,
             color: "text-emerald-600",
             bg: "bg-emerald-50/80"
         }
@@ -135,7 +136,7 @@ export default function ICRDashboard() {
                                     <CardContent className="p-4 flex items-center gap-4">
                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isClarify ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'
                                             }`}>
-                                            {isClarify ? <Inbox className="w-5 h-5" /> : <Activity className="w-5 h-5" />}
+                                            {isClarify ? <Inbox className="w-5 h-5" /> : <FileCheck className="w-5 h-5" />}
                                         </div>
                                         <div className="min-w-0">
                                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{section.projectName}</h4>

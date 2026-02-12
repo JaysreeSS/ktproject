@@ -79,6 +79,7 @@ export default function MyOnboardings() {
                                         <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Project Name</th>
                                         <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Your Role</th>
                                         <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
+                                        <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Deadline</th>
                                         <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Learning Progress</th>
                                         <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right"></th>
                                     </tr>
@@ -102,18 +103,25 @@ export default function MyOnboardings() {
                                                     </span>
                                                 </td>
                                                 <td className="p-4">
-                                                    <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${displayStatus === 'Completed' || displayStatus === 'Signed Off' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                                        displayStatus === 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                                            'bg-slate-100 text-slate-500 border-slate-200'
+                                                    <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${(displayStatus === 'Completed' || displayStatus === 'Signed Off')
+                                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                        : displayStatus === 'In Progress'
+                                                            ? 'bg-blue-50 text-blue-600 border-blue-100'
+                                                            : 'bg-slate-50 text-slate-400 border-slate-200'
                                                         }`}>
-                                                        {displayStatus}
+                                                        {displayStatus === 'Completed' || displayStatus === 'Signed Off' ? 'Signed Off' : (displayStatus || 'Active')}
                                                     </div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">
+                                                        {p.deadline ? new Date(p.deadline).toLocaleDateString() : 'N/A'}
+                                                    </span>
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-4">
                                                         <div className="flex-1 w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                                             <div
-                                                                className={`h-full transition-all duration-1000 ${displayProgress === 100 ? 'bg-emerald-500' : 'bg-orange-500'}`}
+                                                                className={`h-full transition-all duration-1000 ${displayProgress === 100 ? 'bg-emerald-500' : 'bg-primary'}`}
                                                                 style={{ width: `${displayProgress}%` }}
                                                             />
                                                         </div>

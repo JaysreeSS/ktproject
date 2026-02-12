@@ -6,8 +6,7 @@ import {
     LayoutDashboard,
     Send,
     Inbox,
-    LogOut,
-    Activity
+    LogOut
 } from 'lucide-react';
 import logo from '../assets/logo.png';
 

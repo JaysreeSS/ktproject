@@ -113,8 +113,13 @@ export default function HandoverProjectDetails() {
                 </Button>
                 <div className="flex items-center gap-4">
                     <p className="text-sm font-bold text-slate-800 tracking-tight uppercase">{project.name}</p>
-                    <Badge variant="outline" className={`rounded-xl px-4 py-1.5 font-bold text-xs uppercase tracking-wide border-2 ${project.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
-                        {project.status || 'Active'}
+                    <Badge variant="outline" className={`rounded-xl px-4 py-1.5 font-bold text-xs uppercase tracking-wide border-2 ${(project.status === 'Completed' || project.status === 'Signed Off')
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                        : project.status === 'In Progress'
+                            ? 'bg-blue-50 text-blue-600 border-blue-100'
+                            : 'bg-slate-50 text-slate-400 border-slate-200'
+                        }`}>
+                        {project.status === 'Completed' || project.status === 'Signed Off' ? 'Signed Off' : (project.status || 'Active')}
                     </Badge>
                 </div>
             </div>
@@ -125,8 +130,11 @@ export default function HandoverProjectDetails() {
                     {/* Sections List */}
                     <Card className="shadow-lg border-none ring-1 ring-slate-100 rounded-xl bg-white overflow-hidden flex flex-col">
                         <CardHeader className="p-4 pb-3 bg-slate-50/50 border-b border-slate-100 sticky top-0 z-10 backdrop-blur-sm">
-                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                                <Layers className="w-4 h-4" /> Project Sections
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                    <Layers className="w-4 h-4" /> Project Sections
+                                </div>
+                                <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[10px] bg-slate-100 text-slate-600 border-none">{project.sections.length}</Badge>
                             </CardTitle>
                         </CardHeader>
                         <div className="p-3 space-y-2 flex-1 overflow-y-auto">
@@ -168,8 +176,11 @@ export default function HandoverProjectDetails() {
                     {/* Team Members */}
                     <Card className="shadow-lg border-none ring-1 ring-slate-100 rounded-xl bg-white overflow-hidden flex-shrink-0">
                         <CardHeader className="p-4 pb-3 bg-slate-50/50 border-b border-slate-100">
-                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                                <Users className="w-4 h-4" /> Team
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                    <Users className="w-4 h-4" /> Team
+                                </div>
+                                <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[10px] bg-slate-100 text-slate-600 border-none">{project.members.length}</Badge>
                             </CardTitle>
                         </CardHeader>
                         <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto">

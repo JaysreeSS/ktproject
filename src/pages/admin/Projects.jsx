@@ -88,6 +88,7 @@ export default function AdminProjects({ isEmbedded = false }) {
                                             <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Manager</th>
                                             <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
                                             <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Completion</th>
+                                            <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-left">Timeline</th>
                                             <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right"></th>
                                         </tr>
                                     </thead>
@@ -118,22 +119,32 @@ export default function AdminProjects({ isEmbedded = false }) {
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
-                                                        <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${p.status === 'Completed' || p.status === 'Signed Off' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                                            p.status === 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                                                'bg-slate-100 text-slate-500 border-slate-200'
+                                                        <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${(p.status === 'Completed' || p.status === 'Signed Off')
+                                                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                            : p.status === 'In Progress'
+                                                                ? 'bg-blue-50 text-blue-600 border-blue-100'
+                                                                : 'bg-slate-50 text-slate-400 border-slate-200'
                                                             }`}>
-                                                            {p.status || 'Not Started'}
+                                                            {p.status === 'Completed' || p.status === 'Signed Off' ? 'Signed Off' : (p.status || 'Active')}
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-4">
-                                                            <div className="flex-1 w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                            <div className="flex-1 w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                                                 <div
                                                                     className={`h-full transition-all duration-1000 ${displayCompletion === 100 ? 'bg-emerald-500' : 'bg-primary'}`}
                                                                     style={{ width: `${displayCompletion}%` }}
                                                                 />
                                                             </div>
                                                             <span className="text-xs font-black text-slate-700 min-w-[35px] text-right">{displayCompletion}%</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Due</span>
+                                                            <span className="text-xs font-black text-slate-700 uppercase tracking-tight">
+                                                                {p.deadline ? new Date(p.deadline).toLocaleDateString() : 'N/A'}
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td className="p-4 text-right">

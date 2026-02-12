@@ -20,6 +20,7 @@ export default function CreateProject() {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
+        deadline: '',
         members: [], // { userId, ktRole, functionalRole }
         sections: [] // { id, title, contributorId }
     });
@@ -89,10 +90,10 @@ export default function CreateProject() {
             <div className="flex items-center justify-between">
                 <Button
                     variant="ghost"
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => navigate('/manager/projects')}
                     className="w-fit rounded-xl text-primary hover:text-primary hover:bg-primary/10 font-bold uppercase tracking-widest text-[10px] pl-0 hover:pl-2 transition-all"
                 >
-                    <ChevronLeft className="w-4 h-4 mr-1" /> Back to Dashboard
+                    <ChevronLeft className="w-4 h-4 mr-1" /> Back to Projects
                 </Button>
                 <div className="flex gap-2">
                     {[1, 2, 3].map(i => (
@@ -129,6 +130,16 @@ export default function CreateProject() {
                                 className="min-h-[100px] resize-none text-sm font-bold border-slate-200"
                                 value={formData.description}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="deadline" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Deadline (Optional)</Label>
+                            <Input
+                                id="deadline"
+                                type="date"
+                                className="h-10 text-sm font-bold border-slate-200"
+                                value={formData.deadline}
+                                onChange={e => setFormData({ ...formData, deadline: e.target.value })}
                             />
                         </div>
                     </CardContent>

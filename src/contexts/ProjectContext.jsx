@@ -265,6 +265,21 @@ export const ProjectProvider = ({ children }) => {
         setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, status } : p)));
     };
 
+    // Update project details (generic)
+    const updateProject = async (projectId, updates) => {
+        const dbUpdates = {};
+        if (updates.name !== undefined) dbUpdates.name = updates.name;
+        if (updates.description !== undefined) dbUpdates.description = updates.description;
+        if (updates.deadline !== undefined) dbUpdates.deadline = updates.deadline;
+
+        const { error } = await supabase.from("projects").update(dbUpdates).eq("id", projectId);
+        if (error) {
+            console.error("Supabase update project error:", error);
+            return;
+        }
+        setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, ...updates } : p)));
+    };
+
     // Update a section's status/content
     const updateSectionStatus = async (projectId, sectionId, status, content = null) => {
         const updates = { status };
@@ -618,6 +633,7 @@ export const ProjectProvider = ({ children }) => {
                 addSection,
                 removeSection,
                 updateSection,
+                updateProject,
                 loading
             }}
         >

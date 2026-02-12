@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useProjects } from '../../contexts/ProjectContext.jsx';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Folder, Clock, CheckCircle2, ChevronRight, LogOut, Activity, LayoutDashboard, FileText, Send } from 'lucide-react';
+import { Folder, Clock, CheckCircle2, ChevronRight, LogOut, LayoutDashboard, FileText, Send, FolderKanban, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 
@@ -82,7 +82,7 @@ export default function ManagerDashboard() {
                         <CardHeader className="p-5 border-b border-slate-100/80 pb-4 flex flex-row items-center justify-between">
                             <div>
                                 <CardTitle className="text-base font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                                    <Activity className="w-5 h-5 text-primary" />
+                                    <FolderKanban className="w-5 h-5 text-primary" />
                                     Recent Projects
                                 </CardTitle>
                                 <CardDescription className="font-bold text-slate-400 text-xs">LATEST UPDATES ON YOUR PROJECTS</CardDescription>
@@ -100,11 +100,13 @@ export default function ManagerDashboard() {
                                                 <h4 className="text-sm font-black text-slate-900 group-hover:text-primary transition-colors uppercase tracking-tight">{proj.name}</h4>
                                                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{proj.description}</p>
                                             </div>
-                                            <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-md border ${proj.status === 'Completed' ? 'bg-emerald-100 text-emerald-600 border-emerald-200' :
-                                                proj.status === 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                                                    'bg-slate-100 text-slate-600 border-slate-200'
+                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border-2 ${(proj.status === 'Completed' || proj.status === 'Signed Off')
+                                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                    : proj.status === 'In Progress'
+                                                        ? 'bg-blue-50 text-blue-600 border-blue-100'
+                                                        : 'bg-slate-50 text-slate-400 border-slate-200'
                                                 }`}>
-                                                {proj.status || 'Not Started'}
+                                                {proj.status === 'Completed' || proj.status === 'Signed Off' ? 'Signed Off' : (proj.status || 'Active')}
                                             </span>
                                         </div>
                                         <Progress value={proj.completion} className="h-1.5 bg-slate-100"
@@ -127,7 +129,7 @@ export default function ManagerDashboard() {
                     <Card className="border-none shadow-lg shadow-slate-200/40 flex flex-col h-[400px]">
                         <CardHeader className="p-5 border-b border-slate-100/80 pb-4">
                             <CardTitle className="text-base font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                                <Activity className="w-5 h-5 text-orange-500" />
+                                <AlertCircle className="w-5 h-5 text-orange-500" />
                                 Attention Needed
                             </CardTitle>
                             <CardDescription className="font-bold text-slate-400 text-[10px] uppercase tracking-wider">SECTIONS REQUIRING CLARIFICATION</CardDescription>

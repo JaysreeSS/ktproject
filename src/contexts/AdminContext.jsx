@@ -167,7 +167,6 @@ export const AdminProvider = ({ children }) => {
                 .insert([{
                     title: newTemplate.title,
                     description: newTemplate.description || '',
-                    attachment_url: newTemplate.attachment_url || '',
                     order: maxOrder + 1
                 }])
                 .select();
