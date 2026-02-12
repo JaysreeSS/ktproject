@@ -77,7 +77,6 @@ export default function MyOnboardings() {
                                 <thead className="bg-slate-50/50 border-b border-slate-100">
                                     <tr>
                                         <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Project Name</th>
-                                        <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Your Role</th>
                                         <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
                                         <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Deadline</th>
                                         <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Learning Progress</th>
@@ -96,11 +95,6 @@ export default function MyOnboardings() {
                                                     <div className="flex flex-col">
                                                         <span className="text-sm font-bold text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.name}</span>
                                                     </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <span className="text-xs font-bold text-slate-600 uppercase bg-slate-100 px-3 py-1 rounded-lg">
-                                                        {myRole}
-                                                    </span>
                                                 </td>
                                                 <td className="p-4">
                                                     <div className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest w-fit border-2 ${(displayStatus === 'Completed' || displayStatus === 'Signed Off')
