@@ -240,7 +240,7 @@ export default function OnboardingProjectDetails() {
                                                     : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-200'
                                                 }`}
                                         >
-                                            <ThumbsUp className="w-4 h-4 mr-2" /> Mark as Understood
+                                            <ThumbsUp className="w-4 h-4 mr-2" /> Understood
                                         </Button>
                                     </div>
                                 </CardHeader>
